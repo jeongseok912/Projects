@@ -1,4 +1,4 @@
-Ⅰ. Youtube - Youtube channel anaysis project
+Ⅰ. Youtube - The anaysis project about youtube channel
   1. define  
     1) function
       (1) getSocialerusRanking() : get data from subscribers ranking page on https://socialerus.com
