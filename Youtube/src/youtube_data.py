@@ -7,10 +7,9 @@ from selenium import webdriver
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import TimeoutException, ElementNotVisibleException
+from selenium.common.exceptions import NoSuchElementException, TimeoutException, ElementNotVisibleException
 import pymongo
 import time
-import datetime
 
 # 소셜러스 구독자 랭킹
 # return type: list
@@ -19,7 +18,6 @@ def getSocialerusRanking():
     chromedriver = '../chromedriver.exe'
     chromeBrowser = webdriver.Chrome(chromedriver)
     chromeBrowser.get("https://socialerus.com/ranking/total_ranking.asp?pb_orderBy=CR_SBUSCRIBER_COUNT")
-
 
     try:
         while True:
@@ -32,8 +30,10 @@ def getSocialerusRanking():
                 break
             else:
                 btn.click()
-    except TimeoutException:
-        print(TimeoutException)
+    except TimeoutException as t:
+        print(t)
+    except ElementNotVisibleException as e:
+        print(e)
     finally:
         html = chromeBrowser.page_source # str
         srDoc = BeautifulSoup(html, 'html.parser') # bs4.BeautifulSoup
@@ -50,14 +50,19 @@ def getSocialerusRanking():
         rankingList.append(iArr)
     return rankingList
 
-class Channel():
+
+
+class Channel:
+    chromedriver = '../chromedriver.exe'
+    chromeBrowser = webdriver.Chrome(chromedriver)
+
     def __init__(self):
         self.channelID = ''
         self.channelTitle = ''
         self.subscribers = 0
-        self.tab = ''
-        self.homeTab = ''
-        self.homeTab_sections = ''
+        #self.tab = ''
+        #self.homeTab = ''
+        self.homeTab_sectionsNum = ''
         self.videoTab = ''
         self.playlistTab = ''
         self.playlistTab_sections = ''
@@ -70,11 +75,9 @@ class Channel():
         self.informTab_link = ''
         self.informTab_registerDate = ''
         self.informTab_viewCount = 0
-        self.chromedriver = '../chromedriver.exe'
-        self.chromeBrowser = webdriver.Chrome(self.chromedriver)
 
     def __del__(self):
-        self.chromeBrowser.quit()
+        Channel.chromeBrowser.quit()
 
     def setChannelID(self, channelID):
         self.channelID = channelID
@@ -95,6 +98,22 @@ class Channel():
 
     def getChannelTitle(self):
         return self.channelTitle
+
+    def getSubscriberNum(self):
+        self.subscribers = int(Channel.chromeBrowser.find_element_by_css_selector('#subscriber-count').text[4:-1].replace(',',''))
+        return self.subscribers
+
+    def hasHomeVideoPlayer(self):
+        try:
+            Channel.chromeBrowser.find_element_by_css_selector('ytd-channel-video-player-renderer')
+            return True
+        except NoSuchElementException:
+            return False
+
+    def getHomeSectionNum(self):
+        self.homeTab_sectionsNum = len(Channel.chromeBrowser.find_elements_by_css_selector('#image-container '))
+        return self.homeTab_sectionsNum
+
 ############################################################################################################################
 # Main
 ############################################################################################################################
@@ -104,6 +123,7 @@ conn = pymongo.MongoClient('localhost', 27017)
 db = conn.get_database('youtube_channel')
 collection = db.get_collection('channel')
 
+'''
 # 소셜러스 구독자 랭킹에서 데이터 가져오기
 print('\n### 소셜러스 구독자 랭킹에서 데이터 가져오기 ###')
 rankingList = getSocialerusRanking()
@@ -120,10 +140,11 @@ for i in range(len(rankingList)-1):
 point2 = time.time()
 print('%s seconds' %  (point1 - point2))
 print('total %s seconds' %  (point1 - startTime))
+'''
 
-# 채널 타이틀 가져오기
-print('\n### 채널 타이틀 가져오기 ###')
-selectAll = collection.find({}, no_cursor_timeout=True) # return type: cursor
+# 채널 데이터 가져오기
+print('\n### 채널 데이터 가져오기 ###')
+selectAll = collection.find({}, no_cursor_timeout=True).limit(5) # return type: cursor
 start = time.time()
 t = 0
 cnt = 0
@@ -132,15 +153,24 @@ for selectOne in selectAll:
     ch.setChannelID(selectOne['CID'])
     channelURL = 'https://www.youtube.com/channel/' + ch.getChannelID()
     ch.setChannelTitle(channelURL)
-    collection.update({'_id': selectOne['_id']}, {'$set': {'ChannelName': ch.getChannelTitle()}})
-    print(ch.getChannelTitle())
+    if ch.hasHomeVideoPlayer() == True:
+        totalSectionNum = ch.getHomeSectionNum() + 1
+    else:
+        totalSectionNum = ch.getHomeSectionNum()
+    collection.update({'_id': selectOne['_id']}, {'$set': {
+        'ChannelTitle': ch.getChannelTitle(),
+        'Subscribers': ch.getSubscriberNum(),
+        'HomeTab': {'SectionNum': ch.getHomeSectionNum(),
+                    'VideoPlayer': ch.hasHomeVideoPlayer(),
+                    'TotalSectionNum': totalSectionNum}
+        }})
     cnt += 1
+
 print('cnt : ' + str(cnt))
 del ch
 selectAll.close()
 endTime = time.time()
-print('%s seconds' %  (endTime - point2))
-print('total %s seconds' %  (endTime - startTime))
+
 
 
 
