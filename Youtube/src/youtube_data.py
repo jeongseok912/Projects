@@ -76,7 +76,6 @@ class Channel:
     def __init__(self):
         self.Home = ''
         self.Home_title = ''
-        self.Home_recommendChannel = []
 
         self.videoTab = ''
         self.playlistTab = ''
@@ -130,6 +129,7 @@ class Channel:
         return len(self.chromeBrowser.find_elements_by_css_selector('#image-container'))
 
     def getRecommendChannel(self):
+        self.Home_recommendChannel = []
         elements = self.chromeBrowser.find_elements_by_css_selector('ytd-vertical-channel-section-renderer')
         for element in elements:
             if element.find_element_by_css_selector('#title').text != '관련 채널':
@@ -153,7 +153,7 @@ db = conn.get_database('youtube')
 collection = db.get_collection('channel')
 
 # 소셜러스 데이터 가져올지 트리거
-enableGetSocialerusData(True)
+enableGetSocialerusData(False)
 
 # 채널 데이터 가져오기
 print('\n### 채널 데이터 가져오기 ###')
@@ -170,6 +170,7 @@ for selectOne in selectAll:
         totalSectionNum = ch.getHomeSectionNum()
     print('###' + ch.getChannelTitle() + '###')
     print('-----------------------')
+    ch.getRecommendChannel()
     # 가져온 데이터 저장
     collection.update({'_id': selectOne['_id']}, {'$set': {
         'ChannelTitle': ch.getChannelTitle(),
