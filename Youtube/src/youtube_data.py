@@ -74,6 +74,7 @@ def enableGetSocialerusData(triger):
 
 class Channel:
     def __init__(self):
+        self.channelId = ''
         self.Home = ''
         self.Home_title = ''
 
@@ -97,6 +98,7 @@ class Channel:
 
     def setChannelHomeURL(self, channelID):
         self.Home = 'https://www.youtube.com/channel/' + channelID
+        self.channelId = channelID
 
     def getChannelHomeURL(self):
         return self.Home
@@ -139,10 +141,15 @@ class Channel:
                     self.Home_recommendChannel.append(recoInfo.get_attribute('href'))
         return self.Home_recommendChannel
 
-    def getVideoNum(self, cid):
-        search_query = 'https://www.youtube.com/results?search_query=' + cid
+    def getVideoNum(self):
+        search_query = 'https://www.youtube.com/results?search_query=' + self.Home_title
         self.chromeBrowser.get(search_query)
         return int(self.chromeBrowser.find_element_by_css_selector('#video-count').text[4:-1].replace(',', ''))
+
+    #def getVideoData(self):
+
+
+# video-title
 
 ############################################################################################################################
 # Main
@@ -153,11 +160,11 @@ db = conn.get_database('youtube')
 collection = db.get_collection('channel')
 
 # 소셜러스 데이터 가져올지 트리거
-enableGetSocialerusData(False)
+enableGetSocialerusData(True)
 
 # 채널 데이터 가져오기
 print('\n### 채널 데이터 가져오기 ###')
-selectAll = collection.find({}, no_cursor_timeout=True).limit(5) # return type: cursor
+selectAll = collection.find({}, {'CID':1}, no_cursor_timeout=True).limit(5) # return type: cursor
 cnt = 0
 
 ch = Channel()
@@ -169,19 +176,20 @@ for selectOne in selectAll:
     else:
         totalSectionNum = ch.getHomeSectionNum()
     print('###' + ch.getChannelTitle() + '###')
-    print('-----------------------')
     ch.getRecommendChannel()
     # 가져온 데이터 저장
     collection.update({'_id': selectOne['_id']}, {'$set': {
         'ChannelTitle': ch.getChannelTitle(),
         'Subscriber': ch.getSubscriberNum(),
-        'HomeTab': {'SectionNum': ch.getHomeSectionNum(),
-                    'VideoPlayer': ch.hasHomeVideoPlayer(),
+        'HomeTab': {'VideoPlayer': ch.hasHomeVideoPlayer(),
+                    'SectionNum': ch.getHomeSectionNum(),
                     'TotalSectionNum': totalSectionNum,
                     'recommendChannel': ch.getRecommendChannel()},
-        'VideoTab': {'videoNum': ch.getVideoNum(ch.getChannelTitle())
+        'VideoTab': {'videoNum': ch.getVideoNum()
                      }
         }})
+    print(ch.getVideoNum())
+    print('-----------------------')
     cnt += 1
 print('cnt : ' + str(cnt))
 del ch

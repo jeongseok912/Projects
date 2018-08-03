@@ -14,8 +14,8 @@
       <file leaf-file-name="youtube_data.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/youtube_data.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="93">
-              <caret line="169" column="40" lean-forward="true" selection-start-line="169" selection-start-column="40" selection-end-line="169" selection-end-column="40" />
+            <state relative-caret-position="424">
+              <caret line="189" column="11" lean-forward="true" selection-start-line="189" selection-start-column="11" selection-end-line="189" selection-end-column="11" />
               <folding>
                 <element signature="e#62#91#0" expanded="true" />
               </folding>
@@ -62,8 +62,8 @@
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="951" />
-    <option name="width" value="978" />
+    <option name="x" value="952" />
+    <option name="width" value="977" />
     <option name="height" value="1050" />
   </component>
   <component name="ProjectView">
@@ -203,7 +203,7 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="761" y="0" width="782" height="840" extended-state="0" />
+    <frame x="762" y="0" width="781" height="840" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" weight="0.24869792" />
@@ -211,7 +211,7 @@
       <window_info anchor="bottom" id="Event Log" order="7" side_tool="true" />
       <window_info anchor="bottom" id="Version Control" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Python Console" order="7" />
-      <window_info anchor="bottom" id="Run" order="2" weight="0.3287483" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.3287483" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info anchor="bottom" id="Terminal" order="7" />
       <window_info id="Favorites" order="2" side_tool="true" />
@@ -234,6 +234,26 @@
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/src/youtube_data.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3211">
+          <caret line="169" column="40" lean-forward="true" selection-start-line="169" selection-start-column="40" selection-end-line="169" selection-end-column="40" />
+          <folding>
+            <element signature="e#62#91#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../../Study/Titanic/src/titanic.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="95">
+          <caret line="7" column="26" selection-start-line="7" selection-start-column="26" selection-end-line="7" selection-end-column="26" />
+          <folding>
+            <element signature="e#0#19#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/youtube_data.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="3363">
@@ -429,8 +449,8 @@
     <entry file="file://$PROJECT_DIR$/src/mongodb.py" />
     <entry file="file://$PROJECT_DIR$/src/youtube_data.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="93">
-          <caret line="169" column="40" lean-forward="true" selection-start-line="169" selection-start-column="40" selection-end-line="169" selection-end-column="40" />
+        <state relative-caret-position="424">
+          <caret line="189" column="11" lean-forward="true" selection-start-line="189" selection-start-column="11" selection-end-line="189" selection-end-column="11" />
           <folding>
             <element signature="e#62#91#0" expanded="true" />
           </folding>
