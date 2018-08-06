@@ -38,23 +38,34 @@ getSpendTime(point1, point2)
 
 # CID로 채널 데이터 가져와서 저장하기
 print('\n### 채널 데이터 저장하기 ###')
-selectAll = collection.find({'CID': 'UCT-_4GqC-yLY1xtTHhwY0hA'}, {'CID':1}, no_cursor_timeout=True) # return type: cursor
-i = 1
+#selectAll = collection.find({'CID': 'UCT-_4GqC-yLY1xtTHhwY0hA'}, {'CID':1}, no_cursor_timeout=True) # return type: cursor
+selectAll = collection.find({}, {'CID':1}, no_cursor_timeout=True) # return type: cursor
+
 ch = channel.Channel()
 start = time.clock()
+sum = 0
 for selectOne in selectAll:
     print('-----------------------')
+    # 채널 설정
     ch.setChannelHomeURL(selectOne['CID'])
+    # 채널 띄우기
     ch.popupChannelHome()
     print('###' + ch.getChannelTitle() + '###')
-    # totalSectionNum
+    # 홈 섹션 개수
     if ch.hasHomeVideoPlayer() == True:
         totalSectionNum = ch.getHomeSectionNum() + 1
     else:
         totalSectionNum = ch.getHomeSectionNum()
-
-    if ch.getChannelTitle() == 'PONY Syndrome':
-        print(ch.getVideoData())
+    # 동영상탭에서 데이터 가져오기
+    '''
+    ch.getVideoTabHTML()
+    videoListData = [data for data in ch.getVideoListData()]
+    point3 = time.clock()
+    for i in range(len(videoListData)):
+        ch.moveToVideo(videoListData[i]['URL'])
+    point4 = time.clock()
+    getSpendTime(point3, point4)
+    '''
 
     # 가져온 데이터 저장
     collection.update({'_id': selectOne['_id']}, {'$set':
@@ -67,23 +78,21 @@ for selectOne in selectAll:
                     'SectionNum': ch.getHomeSectionNum(),
                     'TotalSectionNum': totalSectionNum,
                     'recommendChannel': [href for href in ch.getRecommendChannel()]
+                },
+            'VideoTab':
+                {
+                    'VideoNum': ch.getVideoNum(),
+                    #'VideoData': videoListData
                 }
-
         }
     })
-    '''
-                   'VideoTab':
-                       {
-                           'videoNum': ch.getVideoNum()
-                           'video': [href for href in ch.getVideoData()]
-                       }
-                   '''
+    print(ch.getChannelTitle() + ': ' + str(ch.getVideoNum()))
+    sum += ch.getVideoNum()
+    print('Total : ' + str(sum))
+print(sum)
+print(sum/len(selectAll))
 
-    #collectionName = 'ch' + str(i)
-    #chCollection = db.get_collection(collectionName)
-    #chCollection.insert_one({'a':1})
-    i += 1
-#del ch
+del ch
 selectAll.close()
 end = time.clock()
 getSpendTime(start, end)

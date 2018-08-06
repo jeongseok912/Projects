@@ -87,3 +87,5 @@ def enableGetSocialerusData(triger):
         end = time.clock()
         getSpendTime(start, end)
 
+if __name__ == '__main__':
+    pass

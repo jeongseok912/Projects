@@ -1,9 +1,16 @@
 from selenium import webdriver
+from selenium.webdriver import ActionChains
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import NoSuchElementException, TimeoutException, WebDriverException
 from bs4 import BeautifulSoup
+
+class SquenceError(Exception):
+    def __init__(self, msg):
+        self.msg = msg
+    def __str__(self):
+        return self.msg
 
 class Channel:
     def __init__(self):
@@ -12,6 +19,7 @@ class Channel:
         self.Home_title = ''
 
         self.videoTab = ''
+        self.videoNum = 0
         self.playlistTab = ''
         self.playlistTab_sections = ''
         self.channelTab = ''
@@ -25,6 +33,21 @@ class Channel:
         self.informTab_viewCount = 0
         self.chromedriver = '../chromedriver.exe'
         self.chromeBrowser = webdriver.Chrome(self.chromedriver)
+        '''
+        # headless
+        self.chrome_options = webdriver.ChromeOptions()
+        self.chrome_options.add_argument("headless")
+        self.chrome_options.add_argument("window-size=1920x1080")
+        self.chrome_options.add_argument("disable-gpu")
+        self.chrome_options.binary_location = "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"
+        self.chrome_options.add_argument(
+            "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36")
+        self.chromeBrowser = webdriver.Chrome(self.chromedriver, chrome_options=self.chrome_options)
+        self.chromeBrowser.execute_script(
+            "Object.defineProperty(navigator, 'languages', {get: function() {return ['ko-KR', 'ko']}})")
+        self.chromeBrowser.execute_script(
+            "Object.defineProperty(navigator, 'plugins', {get: function() {return [1,2,3,4,5]}})")
+        '''
 
     def __del__(self):
         self.chromeBrowser.quit()
@@ -34,11 +57,11 @@ class Channel:
         self.videoTab = self.Home + '/videos'
         self.channelId = channelID
 
-    def getChannelHomeURL(self):
-        return self.Home
-
     def popupChannelHome(self):
-        self.chromeBrowser.get(self.Home)
+        try:
+            self.chromeBrowser.get(self.Home)
+        except WebDriverException:
+            raise SquenceError('execute "setChannelHomeURL()" method!')
 
     def getChannelTitle(self):
         try:
@@ -74,27 +97,45 @@ class Channel:
                 for recoInfo in recoInfos:
                     yield recoInfo.get_attribute('href')
 
+    def getVideoTabHTML(self):
+        try:
+            self.chromeBrowser.get(self.videoTab)
+            WebDriverWait(self.chromeBrowser, 3).until(EC.presence_of_element_located((By.CSS_SELECTOR, '#items > ytd-grid-video-renderer:nth-child(30)')))
+            i = 30
+            while True:
+                self.chromeBrowser.execute_script("window.scrollTo(0, document.documentElement.scrollHeight);")
+                nth = '#items > ytd-grid-video-renderer:nth-child(' + str(i) + ')'
+                WebDriverWait(self.chromeBrowser, 3).until(EC.presence_of_element_located((By.CSS_SELECTOR, nth)))
+                i += 30
+        except TimeoutException as t:
+            print(t)
+        finally:
+            page = self.chromeBrowser.page_source
+            self.videoTab_html = BeautifulSoup(page, 'html.parser')
+
     def getVideoNum(self):
         search_query = 'https://www.youtube.com/results?search_query=' + self.Home_title
         self.chromeBrowser.get(search_query)
         return int(self.chromeBrowser.find_element_by_css_selector('#video-count').text[4:-1].replace(',', ''))
+        #return len(self.videoTab_html.select('#video-title'))
 
-    def getVideoData(self):
-        self.chromeBrowser.get(self.videoTab)
-        lastHeight = self.chromeBrowser.execute_script("return document.documentElement.scrollHeight")
-        print('lastHeight : ' + str(lastHeight))
-        while True:
-            self.chromeBrowser.execute_script("window.scrollTo(0, document.documentElement.scrollHeight);")
-            self.chromeBrowser.implicitly_wait(0.5)
-            newHeight = self.chromeBrowser.execute_script("return document.documentElement.scrollHeight")
-            print('newHeight : ' + str(newHeight))
-            if newHeight == lastHeight:
-                break
-            lastHeight = newHeight
-        page = self.chromeBrowser.page_source
-        html = BeautifulSoup(page, 'html.parser')
-        for href in html.select('#thumbnail'):
-            href.get('href')
-        for video_title in html.select('#video-title'):
-            print(video_title.text)
-        print(len(html.select('#video-title')))
+    def getVideoListData(self):
+        i = 0
+        for href in self.videoTab_html.select('#thumbnail'):
+            yield {
+                    'URL': 'https://www.youtube.com' + href.get('href'),
+                    'Title': self.videoTab_html.select('#video-title')[i].text,
+                    'ViewCount': self.videoTab_html.select('# metadata-line > span').text,
+                    'ElapsedTime': self.videoTab_html.select('#metadata-line > span + span')[i].text
+                   }
+            i += 1
+
+    def moveToVideo(self, url):
+        self.chromeBrowser.get(url)
+        print(WebDriverWait(self.chromeBrowser, 3).until(EC.presence_of_element_located((By.CSS_SELECTOR, '#container > h1 > yt-formatted-string'))).text)
+        print(self.chromeBrowser.find_element_by_css_selector('#count > yt-view-count-renderer > span.view-count.style-scope.yt-view-count-renderer').text)
+
+
+
+if __name__ == '__main__':
+    pass
