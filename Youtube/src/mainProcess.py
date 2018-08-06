@@ -38,12 +38,12 @@ getSpendTime(point1, point2)
 
 # CID로 채널 데이터 가져와서 저장하기
 print('\n### 채널 데이터 저장하기 ###')
-#selectAll = collection.find({'CID': 'UCT-_4GqC-yLY1xtTHhwY0hA'}, {'CID':1}, no_cursor_timeout=True) # return type: cursor
-selectAll = collection.find({}, {'CID':1}, no_cursor_timeout=True) # return type: cursor
+selectAll = collection.find({'CID': 'UCT-_4GqC-yLY1xtTHhwY0hA'}, {'CID':1}, no_cursor_timeout=True) # return type: cursor
+# selectAll = collection.find({}, {'CID':1}, no_cursor_timeout=True) # return type: cursor
 
 ch = channel.Channel()
 start = time.clock()
-sum = 0
+#sum = 0
 for selectOne in selectAll:
     print('-----------------------')
     # 채널 설정
@@ -57,15 +57,15 @@ for selectOne in selectAll:
     else:
         totalSectionNum = ch.getHomeSectionNum()
     # 동영상탭에서 데이터 가져오기
-    '''
+    point3 = time.clock()
     ch.getVideoTabHTML()
     videoListData = [data for data in ch.getVideoListData()]
-    point3 = time.clock()
+    '''
     for i in range(len(videoListData)):
         ch.moveToVideo(videoListData[i]['URL'])
+    '''
     point4 = time.clock()
     getSpendTime(point3, point4)
-    '''
 
     # 가져온 데이터 저장
     collection.update({'_id': selectOne['_id']}, {'$set':
@@ -82,15 +82,19 @@ for selectOne in selectAll:
             'VideoTab':
                 {
                     'VideoNum': ch.getVideoNum(),
-                    #'VideoData': videoListData
+                    'VideoData': videoListData
                 }
         }
     })
+    '''
     print(ch.getChannelTitle() + ': ' + str(ch.getVideoNum()))
     sum += ch.getVideoNum()
     print('Total : ' + str(sum))
+    '''
+'''
 print(sum)
 print(sum/len(selectAll))
+'''
 
 del ch
 selectAll.close()

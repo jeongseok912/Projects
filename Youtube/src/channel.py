@@ -122,11 +122,20 @@ class Channel:
     def getVideoListData(self):
         i = 0
         for href in self.videoTab_html.select('#thumbnail'):
+            span = self.videoTab_html.select('#metadata-line > span:nth-of-type(1)')[i]
+            viewNum = 0
+            if span.text[-2:-1] == '만':
+                if span.text[-4:-5] == '.':
+                    span.text[4:-2].replace('.', '') + '000'
+                viewNum = int(span.text[4:-2] + '0000')
+            elif span.text[-2:-1] == '천':
+                viewNum = int(span.text[4:-2] + '000')
+                span.text[4:-2].
             yield {
                     'URL': 'https://www.youtube.com' + href.get('href'),
                     'Title': self.videoTab_html.select('#video-title')[i].text,
-                    'ViewCount': self.videoTab_html.select('# metadata-line > span').text,
-                    'ElapsedTime': self.videoTab_html.select('#metadata-line > span + span')[i].text
+                    'ViewCount': viewNum,
+                    'ElapsedTime': self.videoTab_html.select('#metadata-line > span:nth-of-type(2)')[i].text
                    }
             i += 1
 
