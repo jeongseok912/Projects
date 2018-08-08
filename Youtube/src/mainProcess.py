@@ -6,7 +6,8 @@ import pymongo
 import socialerus as sr
 import channel
 
-def getSpendTime(start, end):
+def getSpendTime(start):
+    end = time.clock()
     spendTime_sec = int(end - start)
     if spendTime_sec < 60:
         print('경과 시간 : ' + str(spendTime_sec) + '초')
@@ -21,7 +22,8 @@ db = conn.get_database('youtube')
 collection = db.get_collection('channel')
 
 # 소셜러스 데이터 트리거
-sr.enableGetSocialerusData(False)
+# TODO: 배열 리턴 -> 제너레이터로 변경
+sr.enableGetSocialerusData(True)
 
 '''
 print('Distinct : ' + str(len(collection.distinct('CID'))))
@@ -32,75 +34,107 @@ for compare in collection.find({}, {'CID':1}, no_cursor_timeout=True):
     if collection.find({'CID': compare['CID']}).count() > 1:
         for dup in collection.find({'CID': compare['CID']}):
             print(dup)
-point2 = time.clock()
-getSpendTime(point1, point2)
+getSpendTime(point1)
 '''
 
+# 리스트 전처리
+## 국내 유튜버 선별
+loc = channel.Channel()
+for doc in collection.find({}, {'CID':1}, no_cursor_timeout=True):
+    loc.setChannelHomeURL(doc['CID'])
+    collection.update({'_id': doc['_id']}, {'$set':
+        {
+            'Loc': loc.getLocation()
+        }
+    })
+"""
 # CID로 채널 데이터 가져와서 저장하기
 print('\n### 채널 데이터 저장하기 ###')
-selectAll = collection.find({'CID': 'UCT-_4GqC-yLY1xtTHhwY0hA'}, {'CID':1}, no_cursor_timeout=True) # return type: cursor
-# selectAll = collection.find({}, {'CID':1}, no_cursor_timeout=True) # return type: cursor
+#selectAll = collection.find({'CID': 'UCT-_4GqC-yLY1xtTHhwY0hA'}, {'CID':1}, no_cursor_timeout=True) # return type: cursor
+selectAll = collection.find({}, {'CID':1}, no_cursor_timeout=True).limit(5) # return type: cursor
 
 ch = channel.Channel()
 start = time.clock()
-#sum = 0
 for selectOne in selectAll:
-    print('-----------------------')
+    print('----------------------------------------------')
     # 채널 설정
     ch.setChannelHomeURL(selectOne['CID'])
-    # 채널 띄우기
-    ch.popupChannelHome()
-    print('###' + ch.getChannelTitle() + '###')
-    # 홈 섹션 개수
+    # 채널 소스 가져오기
+    ch.getPageSource()
+    '''
+    # 채널홈 이동
+    ch.moveToChannelHome()
+    # 채널 제목
+    channelTitle = ch.getChannelTitle()
+    # 구독자 수
+    channelSubscriberNum = ch.getSubscriberNum()
+    # 홈 섹션 메인비디오플레이어 사용여부
+    homeVideoPlayer = ch.hasHomeVideoPlayer()
+    # 메인비디오플레이어 섹션을 제외한 사용 섹션 개수
+    homeSectionNum = ch.getHomeSectionNum()
+    # 총 홈 섹션 개수
     if ch.hasHomeVideoPlayer() == True:
         totalSectionNum = ch.getHomeSectionNum() + 1
     else:
         totalSectionNum = ch.getHomeSectionNum()
-    # 동영상탭에서 데이터 가져오기
-    point3 = time.clock()
-    ch.getVideoTabHTML()
-    videoListData = [data for data in ch.getVideoListData()]
+    recommendChannel = [href for href in ch.getRecommendChannel()]
+    # 동영상 개수
+    #videoNum = ch.getVideoNum()
+    # 재생목록 개수
+    playlistNum = ch.getPlaylistsNum()
+    # 토론탭 댓글 개수
+    discussionReviewNum = ch.getDiscussionReviewNum()
+    # 커뮤니티 포스팅 수
+    communityPostNum = ch.getCommunityPostNum()
+    # TODO: 데이터 일부만 불러오는 문제 해결필요. 보류
+
+    # 동영상 탭 HTML 소스 가져오기
+    videoNum = ch.getVideoTabHTML()
     '''
+    # 동영상 탭 동영상 메타데이터 가져오기
+    # videoListData = [data for data in ch.getVideoTabData()] #
+    '''
+    # TODO: 각 동영상 url 접속해서 데이터를 가져오기에는 시간이 너무 오래걸림. 추후 고찰
     for i in range(len(videoListData)):
         ch.moveToVideo(videoListData[i]['URL'])
-    '''
-    point4 = time.clock()
-    getSpendTime(point3, point4)
 
     # 가져온 데이터 저장
     collection.update({'_id': selectOne['_id']}, {'$set':
         {
-            'ChannelTitle': ch.getChannelTitle(),
-            'Subscriber': ch.getSubscriberNum(),
+            'ChannelTitle': channelTitle,
+            'Subscriber': channelSubscriberNum,
             'HomeTab':
                 {
-                    'VideoPlayer': ch.hasHomeVideoPlayer(),
-                    'SectionNum': ch.getHomeSectionNum(),
+                    'VideoPlayer': homeVideoPlayer,
+                    'SectionNum': homeSectionNum,
                     'TotalSectionNum': totalSectionNum,
-                    'recommendChannel': [href for href in ch.getRecommendChannel()]
+                    'RecommendChannel': recommendChannel
                 },
             'VideoTab':
                 {
-                    'VideoNum': ch.getVideoNum(),
-                    'VideoData': videoListData
+                    'VideoNum': videoNum
+                    # TODO: 데이터 일부만 불러오는 문제해결 필요. 보류
+                    # 'VideoData': videoListData
+                },
+            'PlaylistTab':
+                {
+                    'PlaylistNum': playlistNum
+                },
+            'DiscussionTab':
+                {
+                    'ReviewNum': discussionReviewNum
+                },
+            'CommunityTab':
+                {
+                    'PostNum': communityPostNum
                 }
         }
     })
     '''
-    print(ch.getChannelTitle() + ': ' + str(ch.getVideoNum()))
-    sum += ch.getVideoNum()
-    print('Total : ' + str(sum))
-    '''
-'''
-print(sum)
-print(sum/len(selectAll))
-'''
-
 del ch
 selectAll.close()
-end = time.clock()
-getSpendTime(start, end)
-
+getSpendTime(start)
+"""
 
 
 

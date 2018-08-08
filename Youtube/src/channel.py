@@ -1,10 +1,21 @@
 from selenium import webdriver
-from selenium.webdriver import ActionChains
-from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support.wait import WebDriverWait as wait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException, TimeoutException, WebDriverException
 from bs4 import BeautifulSoup
+import re
+import time
+
+def getSpendTime(start):
+    end = time.clock()
+    spendTime_sec = int(end - start)
+    if spendTime_sec < 60:
+        print('경과 시간 : ' + str(spendTime_sec) + '초')
+    elif spendTime_sec >= 60:
+        print('경과 시간 : ' + str(int(spendTime_sec/60)) + '분 ' + str(int(spendTime_sec%60)) + '초')
+    elif spendTime_sec >= 3600:
+        print('경과 시간 : ' + str(int(spendTime_sec/3600)) + '시간 ' + str(int((spendTime_sec%3600)/60)) + '분 ' + str(int((spendTime_sec%3600)%60)) + '초')
 
 class SquenceError(Exception):
     def __init__(self, msg):
@@ -14,23 +25,6 @@ class SquenceError(Exception):
 
 class Channel:
     def __init__(self):
-        self.channelId = ''
-        self.Home = ''
-        self.Home_title = ''
-
-        self.videoTab = ''
-        self.videoNum = 0
-        self.playlistTab = ''
-        self.playlistTab_sections = ''
-        self.channelTab = ''
-        self.channelTab_recommendChannel = ''
-        self.cummunityTab = ''
-        self.informTab = ''
-        self.informTab_desc = ''
-        self.informTab_country = ''
-        self.informTab_link = ''
-        self.informTab_registerDate = ''
-        self.informTab_viewCount = 0
         self.chromedriver = '../chromedriver.exe'
         self.chromeBrowser = webdriver.Chrome(self.chromedriver)
         '''
@@ -52,20 +46,77 @@ class Channel:
     def __del__(self):
         self.chromeBrowser.quit()
 
+    def scrollDown(self):
+        last_height = self.chromeBrowser.execute_script("return document.documentElement.scrollHeight")
+        while True:
+            self.chromeBrowser.execute_script("window.scrollTo(0, document.documentElement.scrollHeight);")
+            try:
+                wait(self.chromeBrowser, 3).until(
+                    lambda driver: driver.execute_script("return document.documentElement.scrollHeight") > last_height)
+            except TimeoutException:
+                break
+            last_height = self.chromeBrowser.execute_script("return document.documentElement.scrollHeight")
+
     def setChannelHomeURL(self, channelID):
         self.Home = 'https://www.youtube.com/channel/' + channelID
-        self.videoTab = self.Home + '/videos'
+        self.videoTab = self.Home + '/videos?flow=grid&view=0'
+        self.playlistsTab = self.Home + '/playlists'
+        self.discussionTab = self.Home + '/discussion'
+        self.communityTab = self.Home + '/community'
+        self.aboutTab = self.Home + '/about'
         self.channelId = channelID
 
-    def popupChannelHome(self):
+    def getLocation(self):
+        start = time.clock()
+        # 장소 가져오기
+        self.chromeBrowser.get(self.aboutTab)
+        if wait(self.chromeBrowser, 3).until(EC.presence_of_element_located((By.CSS_SELECTOR, '#details-container > table > tbody > tr:nth-of-type(2) > td:nth-of-type(2) > yt-formatted-string'))):
+            return self.chromeBrowser.find_element_by_css_selector('#details-container > table > tbody > tr:nth-of-type(2) > td:nth-of-type(2) > yt-formatted-string').text
+        getSpendTime()
+
+    def getPageSource(self):
+        start = time.clock()
+        # 홈 소스 가져오기
+        self.chromeBrowser.get(self.Home)
+        self.scrollDown()
+        home_src = self.chromeBrowser.page_source
+        self.home_Parser = BeautifulSoup(home_src, 'html.parser')
+        # 비디오탭 소스 가져오기
+        self.chromeBrowser.get(self.videoTab)
+        self.scrollDown()
+        videoTab_src = self.chromeBrowser.page_source
+        self.videoTab_Parser = BeautifulSoup(videoTab_src, 'html.parser')
+        # 재생목록탭 소스 가져오기
+        self.chromeBrowser.get(self.playlistsTab)
+        self.scrollDown()
+        playlistsTab_src = self.chromeBrowser.page_source
+        self.playlistsTab_Parser = BeautifulSoup(playlistsTab_src, 'html.parser')
+        # 토론탭 소스 가져오기
+        self.chromeBrowser.get(self.discussionTab)
+        if self.chromeBrowser.find_elements_by_css_selector('#image-container') is None:
+            self.scrollDown()
+            discussionTab_src = self.chromeBrowser.page_source
+            self.discussionTab_Parser = BeautifulSoup(discussionTab_src, 'html.parser')
+        # 커뮤니티탭 소스 가져오기
+        self.chromeBrowser.get(self.communityTab)
+        if self.chromeBrowser.find_elements_by_css_selector('#image-container') is None:
+            self.scrollDown()
+            communityTab_src = self.chromeBrowser.page_source
+            self.communityTab_Parser = BeautifulSoup(communityTab_src, 'html.parser')
+        # 경과시간
+        getSpendTime(start)
+
+    def moveToChannelHome(self):
+        print('moveToChannelHome()')
         try:
             self.chromeBrowser.get(self.Home)
         except WebDriverException:
             raise SquenceError('execute "setChannelHomeURL()" method!')
 
     def getChannelTitle(self):
+        print('getChannelTitle()')
         try:
-            chTitleElement = WebDriverWait(self.chromeBrowser, 10).until(EC.presence_of_element_located((By.ID, 'channel-title')))
+            chTitleElement = wait(self.chromeBrowser, 10).until(EC.presence_of_element_located((By.ID, 'channel-title')))
             if chTitleElement is not None:
                 self.Home_title = chTitleElement.text
             else:
@@ -73,12 +124,15 @@ class Channel:
         except Exception as e:
             print(e)
         finally:
+            print('- ' + self.Home_title + ' -')
             return self.Home_title
 
     def getSubscriberNum(self):
-        return int(self.chromeBrowser.find_element_by_css_selector('#subscriber-count').text[4:-1].replace(',',''))
+        print('getSubscriberNum()')
+        return int(self.chromeBrowser.find_element_by_css_selector('#subscriber-count').text[4:-1].replace(',', ''))
 
     def hasHomeVideoPlayer(self):
+        print('hasHomeVideoPlayer()')
         try:
             self.chromeBrowser.find_element_by_css_selector('ytd-channel-video-player-renderer')
             return True
@@ -86,9 +140,11 @@ class Channel:
             return False
 
     def getHomeSectionNum(self):
+        print('getHomeSectionNum()')
         return len(self.chromeBrowser.find_elements_by_css_selector('#image-container'))
 
     def getRecommendChannel(self):
+        print('getRecommendChannel()')
         elements = self.chromeBrowser.find_elements_by_css_selector('ytd-vertical-channel-section-renderer')
         for element in elements:
             if element.find_element_by_css_selector('#title').text != '관련 채널':
@@ -97,40 +153,50 @@ class Channel:
                 for recoInfo in recoInfos:
                     yield recoInfo.get_attribute('href')
 
-    def getVideoTabHTML(self):
-        try:
-            self.chromeBrowser.get(self.videoTab)
-            WebDriverWait(self.chromeBrowser, 3).until(EC.presence_of_element_located((By.CSS_SELECTOR, '#items > ytd-grid-video-renderer:nth-child(30)')))
-            i = 30
-            while True:
-                self.chromeBrowser.execute_script("window.scrollTo(0, document.documentElement.scrollHeight);")
-                nth = '#items > ytd-grid-video-renderer:nth-child(' + str(i) + ')'
-                WebDriverWait(self.chromeBrowser, 3).until(EC.presence_of_element_located((By.CSS_SELECTOR, nth)))
-                i += 30
-        except TimeoutException as t:
-            print(t)
-        finally:
-            page = self.chromeBrowser.page_source
-            self.videoTab_html = BeautifulSoup(page, 'html.parser')
-
     def getVideoNum(self):
+        print('getVideoNum()')
         search_query = 'https://www.youtube.com/results?search_query=' + self.Home_title
         self.chromeBrowser.get(search_query)
-        return int(self.chromeBrowser.find_element_by_css_selector('#video-count').text[4:-1].replace(',', ''))
-        #return len(self.videoTab_html.select('#video-title'))
+        self.videoNum = int(self.chromeBrowser.find_element_by_css_selector('#video-count').text[4:-1].replace(',', ''))
+        return self.videoNum
 
-    def getVideoListData(self):
+    def getVideoTabHTML(self):
+        print('getVideoTabHTML()')
+        p1 = time.clock()
+        self.chromeBrowser.get(self.videoTab)
+        self.scrollDown()
+        page = self.chromeBrowser.page_source
+        self.videoTab_html = BeautifulSoup(page, 'html.parser')
+        getSpendTime(p1)
+        self.videoNum = len(self.chromeBrowser.find_elements_by_css_selector('#items > ytd-grid-video-renderer'))
+
+    def getVideoTabData(self):
+        print('getVideoTabData()')
         i = 0
         for href in self.videoTab_html.select('#thumbnail'):
-            span = self.videoTab_html.select('#metadata-line > span:nth-of-type(1)')[i]
+            span = self.videoTab_html.select('#metadata-line > span:nth-of-type(1)')[i].text
             viewNum = 0
-            if span.text[-2:-1] == '만':
-                if span.text[-4:-5] == '.':
-                    span.text[4:-2].replace('.', '') + '000'
-                viewNum = int(span.text[4:-2] + '0000')
-            elif span.text[-2:-1] == '천':
-                viewNum = int(span.text[4:-2] + '000')
-                span.text[4:-2].
+            tenThousand = re.compile('조회수 \d+만회')
+            dotTenThousand = re.compile('조회수 \d+[.]\d+만회')
+            thousand = re.compile('조회수 \d+천회')
+            dotThousand = re.compile('조회수 \d+[.]\d+천회')
+            count = re.compile('조회수 \d+회')
+
+            if tenThousand.search(span):
+                a = tenThousand.sub(span[4:-2] + '0000', span)
+                viewNum = int(a)
+            if dotTenThousand.search(span):
+                b = dotTenThousand.sub(span[4:-4] + span[-3:-2] + '000', span)
+                viewNum = int(b)
+            if thousand.search(span):
+                c = thousand.sub(span[4:-2] + '000', span)
+                viewNum = int(c)
+            if dotThousand.search(span):
+                d = dotThousand.sub(span[4:-4] + span[-3:-2] + '00', span)
+                viewNum = int(d)
+            if count.search(span):
+                e = span[4:-1]
+                viewNum = int(e)
             yield {
                     'URL': 'https://www.youtube.com' + href.get('href'),
                     'Title': self.videoTab_html.select('#video-title')[i].text,
@@ -140,11 +206,32 @@ class Channel:
             i += 1
 
     def moveToVideo(self, url):
+        print('moveToVideo()')
         self.chromeBrowser.get(url)
-        print(WebDriverWait(self.chromeBrowser, 3).until(EC.presence_of_element_located((By.CSS_SELECTOR, '#container > h1 > yt-formatted-string'))).text)
+        print(wait(self.chromeBrowser, 3).until(EC.presence_of_element_located((By.CSS_SELECTOR, '#container > h1 > yt-formatted-string'))).text)
         print(self.chromeBrowser.find_element_by_css_selector('#count > yt-view-count-renderer > span.view-count.style-scope.yt-view-count-renderer').text)
 
+    def getPlaylistsNum(self):
+        print('getPlaylists()')
+        self.chromeBrowser.get(self.playlistsTab)
+        self.scrollDown()
+        return len(self.chromeBrowser.find_elements_by_css_selector('#items > ytd-grid-playlist-renderer'))
 
+    def getDiscussionReviewNum(self):
+        print('getDiscussionReviewNum()')
+        self.chromeBrowser.get(self.discussionTab)
+        if self.chromeBrowser.find_elements_by_css_selector('#image-container'):
+            return 0
+        self.scrollDown()
+        return int(self.chromeBrowser.find_element_by_css_selector('#count > yt-formatted-string').text[3:-1])
+
+    def getCommunityPostNum(self):
+        print('getCommunityPostNum()')
+        self.chromeBrowser.get(self.communityTab)
+        if self.chromeBrowser.find_elements_by_css_selector('#image-container'):
+            return 0
+        self.scrollDown()
+        return len(self.chromeBrowser.find_elements_by_css_selector('#contents > ytd-backstage-post-thread-renderer'))
 
 if __name__ == '__main__':
     pass

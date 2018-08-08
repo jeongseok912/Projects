@@ -11,7 +11,8 @@ conn = pymongo.MongoClient('localhost', 27017)
 db = conn.get_database('youtube')
 collection = db.get_collection('channel')
 
-def getSpendTime(start, end):
+def getSpendTime(start):
+    end = time.clock()
     spendTime_sec = int(end - start)
     if spendTime_sec < 60:
         print('경과 시간 : ' + str(spendTime_sec) + '초')
@@ -22,6 +23,7 @@ def getSpendTime(start, end):
 
 # 소셜러스 구독자 랭킹
 def getSocialerusRanking():
+    print('getSocialerusRanking()')
     chromedriver = '../chromedriver.exe'
     # NonHeadless
     chromeBrowser = webdriver.Chrome(chromedriver)
@@ -73,9 +75,10 @@ def getSocialerusRanking():
 
 def enableGetSocialerusData(triger):
     if triger == True:
+        print('enableGetSocialerusData()')
         # 소셜러스 구독자 랭킹에서 데이터 가져오기
         start = time.clock()
-        print('\n### 소셜러스 구독자 랭킹에서 데이터 가져오기 ###')
+        print('### 소셜러스 구독자 랭킹에서 데이터 가져오기 ###')
         rankingList = getSocialerusRanking()
         print('수집 유튜버 수 : ' + str(len(rankingList)) + '명')
 
@@ -84,8 +87,7 @@ def enableGetSocialerusData(triger):
             collection.insert_one(
                 {"CID": rankingList[i][0],
                  "Category": rankingList[i][1]})
-        end = time.clock()
-        getSpendTime(start, end)
+        getSpendTime(start)
 
 if __name__ == '__main__':
     pass
