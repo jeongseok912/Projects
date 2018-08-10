@@ -4,29 +4,11 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException, ElementNotVisibleException
-import pymongo
-import time
-
-conn = pymongo.MongoClient('localhost', 27017)
-db = conn.get_database('youtube')
-collection = db.get_collection('channel')
-
-def getSpendTime(start):
-    end = time.clock()
-    spendTime_sec = int(end - start)
-    if spendTime_sec < 60:
-        print('경과 시간 : ' + str(spendTime_sec) + '초')
-    elif spendTime_sec >= 60:
-        print('경과 시간 : ' + str(int(spendTime_sec/60)) + '분 ' + str(int(spendTime_sec%60)) + '초')
-    elif spendTime_sec >= 3600:
-        print('경과 시간 : ' + str(int(spendTime_sec/3600)) + '시간 ' + str(int((spendTime_sec%3600)/60)) + '분 ' + str(int((spendTime_sec%3600)%60)) + '초')
 
 # 소셜러스 구독자 랭킹
 def getSocialerusRanking():
-    print('getSocialerusRanking()')
-    chromedriver = '../chromedriver.exe'
     # NonHeadless
-    chromeBrowser = webdriver.Chrome(chromedriver)
+    chromeBrowser = webdriver.Chrome('../chromedriver.exe')
 
     '''
     # Headless
@@ -44,11 +26,6 @@ def getSocialerusRanking():
 
     try:
         while True:
-            # Explicit Waits
-
-            # WebDriverWait는 성공적으로 반환될 때까지 0.5초마다 ExpectedCondition을 호출한다.
-            # ExpectedCondition의 정상 리턴값 : true or not null
-            # 3초 내에 반환 요소를 못찾으면 3초 기다린 후 TimeoutException을 던짐
             btn = WebDriverWait(chromeBrowser, 3).until(EC.presence_of_element_located((By.ID, 'btnMore')))
             if chromeBrowser.find_element_by_id('btnMore').get_attribute('style') != '':
                 break
@@ -73,21 +50,6 @@ def getSocialerusRanking():
         rankingList.append(iArr)
     return rankingList
 
-def enableGetSocialerusData(triger):
-    if triger == True:
-        print('enableGetSocialerusData()')
-        # 소셜러스 구독자 랭킹에서 데이터 가져오기
-        start = time.clock()
-        print('### 소셜러스 구독자 랭킹에서 데이터 가져오기 ###')
-        rankingList = getSocialerusRanking()
-        print('수집 유튜버 수 : ' + str(len(rankingList)) + '명')
-
-        # MongoDB에 랭킹 데이터 저장
-        for i in range(len(rankingList)):
-            collection.insert_one(
-                {"CID": rankingList[i][0],
-                 "Category": rankingList[i][1]})
-        getSpendTime(start)
-
 if __name__ == '__main__':
-    pass
+    print('execute the \"mainProcess.py\"!')
+    exit()
