@@ -3,40 +3,61 @@ import pymongo
 
 # 몽고DB connection
 conn = pymongo.MongoClient('localhost', 27017)
-db = conn.get_database('youtube2')
+db = conn.get_database('youtube')
 collection = db.get_collection('channel')
 
-cursor = collection.find({'CID': 'UCSLbd-2R06iv0VtChxERhDA'}) # IT's okay 잇츠 오케이
+# cursor = collection.find({'CID': 'UCSLbd-2R06iv0VtChxERhDA'}) # IT's okay 잇츠 오케이
 # cursor = collection.find({'CID': 'UCbIjPWkBCUNn-wC_jui2tfA'})  # 02 fa
 # cursor = collection.find({'CID': 'UCKqx9r4mrFglauNBJc1L_eg'})  # [토이푸딩] ToyPudding TV
 # cursor = collection.find({'CID': 'UCEGJpYOKAD4PQuNIoImyReQ'}) # KwonHee
+# cursor = collection.find({'CID': 'UCNth1SaCfdjPg9WFQYtqAfw'}) # 팀 유통기한
+# cursor = collection.find({'CID': 'UCw8ZhLPdQ0u_Y-TLKd61hGA'}) # 1MILLION Dance Studio
+# cursor = collection.find({'CID': 'UCixfddJJ4VkzIa8tMnSWPFQ'}) # Kanna칸나
+cursor = collection.find({'CID': 'UCKG1FQU_Iz5vYvO7_w10_gg'}) #
+
 
 ch = channel.Channel()
 for doc in cursor:
     # 데이터 가져오기
     ch.setChannelHomeURL(doc['CID'])
+    print('channel_id: ' + ch.channel_id)
 
     ch.getAboutTabSource()  # set channel_title, subscriber_num, location
     channel_title = ch.channel_title
     subs_num = ch.subscriber_num
     location = ch.location
-    #print('channel_title: ' + channel_title)
-    #print('subs_num: ' + str(subs_num))
-    #print('location: ' + location)
-    '''
+    print('channel_title: ' + channel_title)
+    print('subs_num: ' + str(subs_num))
+    print('desc_size: ' + str(ch.desc_size,))
+    print('desc: ' + ch.desc)
+    print('location: ' + location)
+    print('link_cnt: ' + str(ch.link_cnt))
+    print('Instagram: ' + str(ch.instagram))
+    print('Facebook: ' + str(ch.facebook))
+    print('Google+: ' + str(ch.googleplus))
+    print('NaverCafe: ' + str(ch.naver_cafe))
+    print('NaverBlog: ' + str(ch.naver_blog))
+    print('Tistory: ' + str(ch.tistory))
+    print('Afreeca: ' + str(ch.afreeca))
+    print('Youtube: ' + str(ch.youtube))
+    print('Tumblur: ' + str(ch.tumblur))
+    print('Others: ' + str(ch.others))
+    print('JoinDate: ' +  ch.join_date)
+    print('TotalViewCount: ' + str(ch.total_view_cnt))
+
     ch.getHomeSource()
-    #print('main_video_enable: ' + str(ch.main_video_enable))
-    #print('section_cnt: ' + str(ch.section_cnt))
+    print('main_video_enable: ' + str(ch.main_video_enable))
+    print('section_cnt: ' + str(ch.section_cnt))
     recommend_ch = [reco for reco in ch.getRecommendChannel()]
     print(str(recommend_ch))
-    
+    '''
     ch.getVideoTabSource()
     print('video_cnt: ' + str(ch.video_cnt))
     print({'VideoData': [a for a in ch.getVideoData()]})
-
+    '''
     ch.getVideoCount()
     print('Search browser video cnt:' + str(ch.video_cnt))
-    '''
+
     ch.getPlaylistsTabSource()
     print('playlist_cnt: ' + str(ch.playlists_cnt))
 

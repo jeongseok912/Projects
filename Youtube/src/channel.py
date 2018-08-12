@@ -71,6 +71,8 @@ class Channel:
         self.youtube = False
         self.tumblur = False
         self.others = False
+        self.join_date = ''
+        self.total_view_cnt = 0
 
         '''
         # headless
@@ -126,7 +128,7 @@ class Channel:
                 self.subscriber_num = 0
             else:
                 self.subscriber_num = int(subs_cnt_parser)
-            # 정보탭 정보 가져오기
+            # 정보탭 섹션 정보 가져오기
             elements_left = self.aboutTab_parser.select('#left-column > div')
             for element_left in elements_left:
                 about_section_name = element_left.select_one('.subheadline').text
@@ -137,7 +139,7 @@ class Channel:
                 # 장소 정보 가져오기
                 elif about_section_name == '세부정보':
                     locVlaue_selector = 'table > tbody > tr:nth-of-type(2) > td:nth-of-type(2) > yt-formatted-string'
-                    if element_left.select_one(locVlaue_selector):
+                    if element_left.select_one(locVlaue_selector).text != '':
                         self.location = element_left.select_one(locVlaue_selector).text
                     else:
                         self.location = 'NA'
@@ -179,10 +181,16 @@ class Channel:
                             cnt += 1
                     if self.link_cnt - cnt != 0:
                         self.others = True
+            # 정보탭 통계 섹션 정보 가져오기
+            self.join_date = self.aboutTab_parser.select_one('#right-column > yt-formatted-string:nth-of-type(2)').text.split(': ')[1]
+            if self.aboutTab_parser.select_one('#right-column > yt-formatted-string:nth-of-type(3)').text != '':
+                self.total_view_cnt = int(self.aboutTab_parser.select_one('#right-column > yt-formatted-string:nth-of-type(3)').text.split(' ')[1][:-1].replace(',',''))
         except TimeoutException as t:
-            print(pcolors.EXPT + 'TimeoutException at ' + pcolors.END + self.home)
+            print(self.channel_title + ', getAboutTabSource()')
+            print(t)
         except NoSuchElementException as n:
-            print(pcolors.EXPT + n + pcolors.END + ' - ' + self.channel_title)
+            print(self.channel_title + ', getAboutTabSource()')
+            print(n)
 
     def getHomeSource(self):
         try:
@@ -199,7 +207,8 @@ class Channel:
                 self.main_video_enable = True
                 self.section_cnt = len(self.home_parser.select('#image-container')) + 1
         except Exception as e:
-            print(pcolors.EXPT + e + pcolors.END + ' - ' + self.channel_title)
+            print(self.channel_title + ', getHomeSource()')
+            print(e)
 
     def getRecommendChannel(self):
         try:
@@ -212,7 +221,8 @@ class Channel:
                         yield reco_Info.select_one('span').text
                         yield 'https://www.youtube.com' + reco_Info['href']
         except Exception as e:
-            print(pcolors.EXPT + e + pcolors.END + ' - ' + self.channel_title)
+            print(self.channel_title + ', getRecommendChannel()')
+            print(e)
 
     # 시간 오래걸리니까 보류
     def getVideoTabSource(self):
@@ -225,7 +235,8 @@ class Channel:
             self.videoTab_parser = BeautifulSoup(self.videoTab_src, 'html.parser')
             self.video_cnt = len(self.videoTab_parser.select('#items > ytd-grid-video-renderer'))
         except Exception as e:
-            print(pcolors.EXPT + e + pcolors.END + ' - ' + self.channel_title)
+            print(self.channel_title + ', getVideoTabSource()')
+            print(e)
 
     def getVideoData(self):
         try:
@@ -263,19 +274,28 @@ class Channel:
                 }
                 i += 1
         except Exception as e:
-            print(pcolors.EXPT + e + pcolors.END + ' - ' + self.channel_title)
+            print(self.channel_title + ', getVideoData()')
+            print(e)
 
     def getVideoCount(self):
         try:
             search_query = 'https://www.youtube.com/results?search_query=' + self.channel_title
+            if self.channel_title == 'KPOP COVER STREET KARAOKE 창현거리노래방 쏭카페':
+                search_query ='https://www.youtube.com/results?search_query=창현 거리노래방& 쏭카페'
+            elif self.channel_title == '음악 연속듣기':
+                search_query = 'https://www.youtube.com/results?search_query=채널 음악 연속듣기'
+            elif self.channel_title == 'kimbap':
+                search_query = 'https://www.youtube.com/results?search_query=채널 kimbap'
             self.driver.get(search_query)
             video_cnt_element = self.driver.find_element_by_css_selector('#video-count').text[4:-1].replace(',', '')
+        except Exception as e:
+            print(self.channel_title + ', getVideoCount()')
+            print(e)
+        finally:
             if video_cnt_element != '':
                 self.video_cnt = int(video_cnt_element)
             else:
                 self.video_cnt = 0
-        except Exception as e:
-            print(pcolors.WARNING + e + pcolors.END + ' - ' + self.channel_title)
 
     def getPlaylistsTabSource(self):
         try:
@@ -287,7 +307,8 @@ class Channel:
             self.playlistsTab_parser = BeautifulSoup(self.playlistsTab_src, 'html.parser')
             self.playlists_cnt = len(self.playlistsTab_parser.select('#items > ytd-grid-playlist-renderer'))
         except Exception as e:
-            print(pcolors.EXPT + e + pcolors.END + ' - ' + self.channel_title)
+            print(self.channel_title + ', getPlaylistsTabSource()')
+            print(e)
 
     def getDiscussionTabSource(self):
         try:
@@ -295,24 +316,26 @@ class Channel:
             self.driver.get(self.discussionTab)
             wait(self.driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, 'body')))
             # 홈으로 넘어가는 경우 고려
-            if self.driver.find_elements_by_css_selector('#image-container') or self.driver.find_element_by_css_selector('#label-text'):
+            if self.driver.find_elements_by_css_selector('#image-container') or self.driver.find_elements_by_css_selector('#label-text') or self.driver.find_element_by_css_selector('#primary'):
                 self.discussionTab_enable = False
                 self.discussion_cnt = 0
             else:
+                print(111)
                 self.scrollDown()
                 self.discussionTab_src = self.driver.page_source
                 self.discussionTab_parser = BeautifulSoup(self.discussionTab_src, 'html.parser')
                 # TODO: 아래 selector 검토 필요
                 self.discussion_cnt = int(self.discussionTab_parser.select_one('#count > yt-formatted-string').text[3:-1])
         except Exception as e:
-            print(pcolors.EXPT + e + pcolors.END + ' - ' + self.channel_title)
+            print(self.channel_title + ', getDiscussionTabSource()')
+            print(e)
 
     def getCommunityTabSource(self):
         try:
             # 커뮤니티탭 소스 가져오기
             self.driver.get(self.communityTab)
             wait(self.driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, 'body')))
-            if self.driver.find_elements_by_css_selector('#image-container') or self.driver.find_element_by_css_selector('#label-text'):
+            if self.driver.find_elements_by_css_selector('#image-container') or self.driver.find_elements_by_css_selector('#label-text') or self.driver.find_element_by_css_selector('#primary'):
                 self.communityTab_enable = False
                 self.post_cnt = 0
             else:
@@ -322,7 +345,8 @@ class Channel:
                 self.scrollDown()
                 self.post_cnt = len(self.communityTab_parser('#contents > ytd-backstage-post-thread-renderer'))
         except Exception as e:
-            print(pcolors.EXPT + e + pcolors.END + ' - ' + self.channel_title)
+            print(self.channel_title + ', getCommunityTabSource()')
+            print(e)
 
     # 시간 오래걸리니까 보류
     def moveToVideo(self, url):
