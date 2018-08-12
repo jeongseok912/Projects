@@ -43,7 +43,6 @@ def getSocialerusRanking():
 
     rankingList = []
     for dataArea in dataAreas:
-        # srElement = dataArea.select_one('.ranking_c_name')
         channelID = dataArea.attrs['href'].split('c_channelid=')[1]
         category = dataArea.select_one('.cg_name')
         iArr = [channelID, category.text]

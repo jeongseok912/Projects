@@ -1,32 +1,25 @@
 # created by jeongseok
 # jeongseok912@gmail.com
 # 2018.07.29
-import time
+
 import pymongo
-import socialerus as sr
-import channel
 from multiprocessing import Pool
 import os
 
+# 정의 모듈
+import socialerus as sr
+import channel
+from myutil import pcolors, times
+
 # 몽고DB connection
 conn = pymongo.MongoClient('localhost', 27017)
-db = conn.get_database('youtube3')
+db = conn.get_database('youtube2')
 collection = db.get_collection('channel')
-
-def getSpendTime(start):
-    end = time.clock()
-    spendTime_sec = int(end - start)
-    if spendTime_sec < 60:
-        print('경과 시간 : ' + str(spendTime_sec) + '초')
-    elif spendTime_sec >= 60:
-        print('경과 시간 : ' + str(int(spendTime_sec/60)) + '분 ' + str(int(spendTime_sec%60)) + '초')
-    elif spendTime_sec >= 3600:
-        print('경과 시간 : ' + str(int(spendTime_sec/3600)) + '시간 ' + str(int((spendTime_sec%3600)/60)) + '분 ' + str(int((spendTime_sec%3600)%60)) + '초')
 
 def enableGetSocialerusData(triger):
     if triger == True:
         # 소셜러스 구독자 랭킹에서 데이터 가져오기
-        start = time.clock()
+        times.START
         print('### 소셜러스 구독자 랭킹에서 데이터 가져오기 ###')
         rankingList = sr.getSocialerusRanking()
         print('수집 유튜버 수 : ' + str(len(rankingList)) + '명')
@@ -39,56 +32,64 @@ def enableGetSocialerusData(triger):
                     "Category": rankingList[i][1]
                 }
             )))
-        getSpendTime(start)
+        times.getSpendTime()
 
 def getData(num):
     try:
+        # 프로세스마다 실행할 리스트 범위 지정
         div = 6
         divList = round(collection.find({}, {'CID': 1}).count() / div)
-        # 프로세스마다 실행할 리스트 범위 지정
         if num == 0:
-            print('PID ' + str(os.getpid()) + ' start point: ' + str(divList))
+            print(pcolors.PID + 'PID ' + str(os.getpid()) + pcolors.END + 'range: 0 - ' + str(divList))
             cursor = collection.find({}, {'CID': 1}, no_cursor_timeout=True).limit(divList)
         elif num == 1:
-            print('PID ' + str(os.getpid()) + ' start point: ' + str(divList*2))
+            print(pcolors.PID + 'PID ' + str(os.getpid()) + pcolors.END + 'range: ' + str(divList+1) + ' - ' + str(divList*2))
             cursor = collection.find({}, {'CID': 1}, no_cursor_timeout=True).skip(divList).limit(divList)
         elif num == 2:
-            print('PID ' + str(os.getpid()) + ' start point: ' + str(divList*3))
+            print(pcolors.PID + 'PID ' + str(os.getpid()) + pcolors.END + 'range : ' + str(divList*2+1) + ' - ' + str(divList*3))
             cursor = collection.find({}, {'CID': 1}, no_cursor_timeout=True).skip(divList*2).limit(divList)
         elif num == 3:
-            print('PID ' + str(os.getpid()) + ' start point: ' + str(divList*4))
+            print(pcolors.PID + 'PID ' + str(os.getpid()) + pcolors.END + 'range: ' + str(divList*3+1) + ' - ' + str(divList*4))
             cursor = collection.find({}, {'CID': 1}, no_cursor_timeout=True).skip(divList*3).limit(divList)
         elif num == 4:
-            print('PID ' + str(os.getpid()) + ' start point: ' + str(divList*5))
+            print(pcolors.PID + 'PID ' + str(os.getpid()) + pcolors.END + 'range: ' + str(divList*4+1) + ' - ' + str(divList*5))
             cursor = collection.find({}, {'CID': 1}, no_cursor_timeout=True).skip(divList*4).limit(divList)
         elif num == 5:
-            print('PID ' + str(os.getpid()) + ' start point: ' + str(divList*6))
-            cursor = collection.find({}, {'CID': 1}, no_cursor_timeout=True).skip(divList*5).limit(divList)
+            print(pcolors.PID + 'PID ' + str(os.getpid()) + pcolors.END + 'range: ' + str(divList*5+1) + ' - ' + str(divList*6))
+            cursor = collection.find({}, {'CID': 1}, no_cursor_timeout=True).skip(divList*5)
 
         # 데이터 가져와서 mongodb에 저장
         ch = channel.Channel()
         for doc in cursor:
             # 데이터 가져오기
             ch.setChannelHomeURL(doc['CID'])
-            ch.getAboutTabSource() # set channel_title, subscriber_num, location
-            channel_title = ch.channel_title
-            subs_num = ch.subscriber_num
-            location = ch.location
+            # 정보탭 정보 가져오기
+            ch.getAboutTabSource()
+            # 홈 정보 가져오기
+            ch.getHomeSource()
+            # 비디오탭 정보 가져오기
+            ch.getVideoTabSource()
+            # 유튜브 검색 엔진에서 비디오 수 가져오기
+            # ch.getVideoCount()
+            # print('Search browser video cnt:' + str(ch.video_cnt))
 
             # mongodb에 저장
-            print('PID ' + str(os.getpid()) + ', [update] ChannelTitle : ' + str(doc.get('_id')) + ', ' + str(collection.update({'_id': doc['_id']}, {'$set':
+            print(pcolors.PID + 'PID ' + str(os.getpid()) + pcolors.CRUD + '(update)' + pcolors.END + str(doc.get('_id')) + ' - ' + ch.channel_title + ', ' + str(collection.update({'_id': doc['_id']}, {'$set':
                 {
-                    'ChannelTitle': channel_title
-                }
-            })))
-            print('PID ' + str(os.getpid()) + ', [update] SubscriberNum : ' + str(doc.get('_id')) + ', ' + str(collection.update({'_id': doc['_id']}, {'$set':
-                {
-                    'SubscriberNum': subs_num
-                }
-            })))
-            print('PID ' + str(os.getpid()) + ', [update] Loc : ' + str(doc.get('_id')) + ', ' + str(collection.update({'_id': doc['_id']}, {'$set':
-                {
-                    'Loc': location
+                    'ChannelTitle': ch.channel_title,
+                    'SubscriberNum': ch.subscriber_num,
+                    'Loc': ch.location,
+                    'HomeTab':
+                        {
+                            'MainVideo': ch.main_video_enable,
+                            'Section' : ch.section_cnt,
+                            'RecommendChannel': [reco for reco in ch.getRecommendChannel()]
+                        },
+                    'VideoTab':
+                        {
+                            'VideoCount': ch.video_cnt,
+                            'VideoData': [a for a in ch.getVideoData()]
+                        }
                 }
             })))
 
@@ -105,13 +106,13 @@ def excuteMultiProcessing():
     p.map(getData, range(proc_num))
 
 if __name__ == '__main__':
-    start = time.clock()
+    times.START
     # TODO: 배열 리턴 -> 제너레이터로 변경
     # 소셜러스 데이터 트리
-    enableGetSocialerusData(True)
+    enableGetSocialerusData(False)
     # 멀티프로세싱으로 youtube에서 데이터 가져오기
     excuteMultiProcessing()
-    getSpendTime(start)
+    times.getSpendTime()
 
 
 """
