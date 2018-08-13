@@ -14,8 +14,8 @@
       <file leaf-file-name="mainProcess.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/mainProcess.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="133">
-              <caret line="123" column="48" selection-start-line="123" selection-start-column="48" selection-end-line="123" selection-end-column="48" />
+            <state relative-caret-position="57">
+              <caret line="3" lean-forward="true" selection-start-line="3" selection-end-line="3" />
               <folding>
                 <element signature="e#62#76#0" expanded="true" />
               </folding>
@@ -26,8 +26,8 @@
       <file leaf-file-name="channel.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/channel.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="342">
-              <caret line="331" column="12" selection-start-line="331" selection-start-column="12" selection-end-line="331" selection-end-column="12" />
+            <state relative-caret-position="397">
+              <caret line="210" column="12" lean-forward="true" selection-start-line="210" selection-start-column="12" selection-end-line="210" selection-end-column="99" />
               <folding>
                 <element signature="e#0#30#0" expanded="true" />
               </folding>
@@ -59,8 +59,8 @@
       <file leaf-file-name="test.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/test.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="342">
-              <caret line="24" column="69" selection-start-line="24" selection-start-column="69" selection-end-line="24" selection-end-column="69" />
+            <state relative-caret-position="323">
+              <caret line="29" lean-forward="true" selection-start-line="29" selection-end-line="29" />
               <folding>
                 <element signature="e#0#14#0" expanded="true" />
               </folding>
@@ -92,6 +92,7 @@
       <find>yt-formatted-string</find>
       <find>subheadline</find>
       <find>video_cnt_element</find>
+      <find>UCqedFesJEREsccJvLnCiCuQ</find>
     </findStrings>
     <replaceStrings>
       <replace />
@@ -120,8 +121,8 @@
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="950" />
-    <option name="width" value="978" />
+    <option name="x" value="948" />
+    <option name="width" value="979" />
     <option name="height" value="1050" />
   </component>
   <component name="ProjectView">
@@ -292,7 +293,7 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="760" y="0" width="782" height="840" extended-state="0" />
+    <frame x="759" y="0" width="783" height="840" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" weight="0.24479167" />
@@ -300,7 +301,7 @@
       <window_info anchor="bottom" id="Event Log" order="7" sideWeight="0.5012987" side_tool="true" weight="0.3287483" />
       <window_info anchor="bottom" id="Version Control" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Python Console" order="7" />
-      <window_info active="true" anchor="bottom" x="677" y="85" width="936" height="639" id="Run" order="2" sideWeight="0.4987013" type="WINDOWED" visible="true" weight="0.27510315" />
+      <window_info anchor="bottom" x="270" y="39" width="1196" height="639" id="Run" order="2" sideWeight="0.4987013" weight="0.27372766" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info anchor="bottom" id="Terminal" order="7" />
       <window_info id="Favorites" order="2" side_tool="true" />
@@ -656,8 +657,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/test.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="342">
-          <caret line="24" column="69" selection-start-line="24" selection-start-column="69" selection-end-line="24" selection-end-column="69" />
+        <state relative-caret-position="323">
+          <caret line="29" lean-forward="true" selection-start-line="29" selection-end-line="29" />
           <folding>
             <element signature="e#0#14#0" expanded="true" />
           </folding>
@@ -666,8 +667,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/channel.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="342">
-          <caret line="331" column="12" selection-start-line="331" selection-start-column="12" selection-end-line="331" selection-end-column="12" />
+        <state relative-caret-position="397">
+          <caret line="210" column="12" lean-forward="true" selection-start-line="210" selection-start-column="12" selection-end-line="210" selection-end-column="99" />
           <folding>
             <element signature="e#0#30#0" expanded="true" />
           </folding>
@@ -676,8 +677,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/mainProcess.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="133">
-          <caret line="123" column="48" selection-start-line="123" selection-start-column="48" selection-end-line="123" selection-end-column="48" />
+        <state relative-caret-position="57">
+          <caret line="3" lean-forward="true" selection-start-line="3" selection-end-line="3" />
           <folding>
             <element signature="e#62#76#0" expanded="true" />
           </folding>

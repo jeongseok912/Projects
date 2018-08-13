@@ -25,7 +25,7 @@ collection = db.get_collection('channel')
 # cursor = collection.find({'CID': 'UCfTswP_uNy_h86pUjCU410A'}) # HANA 김하나
 # cursor = collection.find({'CID': 'UCmcOMiiFPkBTx3UK2yfUekQ'}) # #nebyvlogs
 # cursor = collection.find({'CID': 'UCfDWSYJhJfvZm-abHS1lH6Q'}) # Jon Park Vlogs
-cursor = collection.find({'CID': 'UC7ONcieyqW5D_-QN4N0riMg'}) # BoraTube[보라튜브]
+cursor = collection.find({'CID': 'UClqMRYeJyY4_qhcY15okzmQ?'})
 
 
 

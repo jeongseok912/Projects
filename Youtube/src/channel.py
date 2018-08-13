@@ -189,12 +189,9 @@ class Channel:
                 self.total_view_cnt = self.aboutTab_parser.select_one('#right-column > yt-formatted-string:nth-of-type(3)').text.split(' ')[1][:-1]
                 if self.total_view_cnt.find(',') != -1:
                     self.total_view_cnt = int(self.total_view_cnt.replace(',', ''))
-        except TimeoutException as t:
-            print(self.channel_title + ', getAboutTabSource()')
-            print(t)
-        except NoSuchElementException as n:
-            print(self.channel_title + ', getAboutTabSource()')
-            print(n)
+        except Exception as e:
+            print(pcolors.EXPT + self.channel_title + ', getAboutTabSource(), ' + str(e) + pcolors.END)
+
 
     def getHomeSource(self):
         try:
@@ -211,8 +208,7 @@ class Channel:
                 self.main_video_enable = True
                 self.section_cnt = len(self.home_parser.select('#image-container')) + 1
         except Exception as e:
-            print(self.channel_title + ', getHomeSource()')
-            print(e)
+            print(pcolors.EXPT + self.channel_title + ', getHomeSource(), ' + str(e) + pcolors.END)
 
     def getRecommendChannel(self):
         try:
@@ -225,8 +221,7 @@ class Channel:
                         yield reco_Info.select_one('span').text
                         yield 'https://www.youtube.com' + reco_Info['href']
         except Exception as e:
-            print(self.channel_title + ', getRecommendChannel()')
-            print(e)
+            print(pcolors.EXPT + self.channel_title + ', getRecommendChannel(), '    + str(e) + pcolors.END)
 
     # 시간 오래걸리니까 보류
     def getVideoTabSource(self):
@@ -239,8 +234,7 @@ class Channel:
             self.videoTab_parser = BeautifulSoup(self.videoTab_src, 'html.parser')
             self.video_cnt = len(self.videoTab_parser.select('#items > ytd-grid-video-renderer'))
         except Exception as e:
-            print(self.channel_title + ', getVideoTabSource()')
-            print(e)
+            print(pcolors.EXPT + self.channel_title + ', getVideoTabSource(), ' + str(e) + pcolors.END)
 
     def getVideoData(self):
         try:
@@ -278,29 +272,29 @@ class Channel:
                 }
                 i += 1
         except Exception as e:
-            print(self.channel_title + ', getVideoData()')
-            print(e)
+            print(pcolors.EXPT + self.channel_title + ', getVideoData(), ' + str(e) + pcolors.END)
 
     def getVideoCount(self):
         try:
+            video_cnt_element = ''
             try:
-                search = self.driver.find_element_by_css_selector('#form').get_attribute('action').split('/')[-2]
-                search_query = 'https://www.youtube.com/results?search_query=' + search
-                self.driver.get(search_query)
-                video_cnt_element = self.driver.find_element_by_css_selector('#video-count').text[4:-1]
+                try:
+                    search = self.driver.find_element_by_css_selector('#form').get_attribute('action').split('/')[-2]
+                    search_query = 'https://www.youtube.com/results?search_query=' + search
+                    self.driver.get(search_query)
+                    video_cnt_element = self.driver.find_element_by_css_selector('#video-count').text[4:-1]
+                except NoSuchElementException:
+                    print(pcolors.WARNING + self.channel_title + ', getVideoCount(), Can\'t find the video count with action, So scraper will find it with channel_title' + pcolors.END)
+                    search_query = 'https://www.youtube.com/results?search_query=' + self.channel_title
+                    self.driver.get(search_query)
+                    video_cnt_element = self.driver.find_element_by_css_selector('#video-count').text[4:-1]
             except NoSuchElementException:
-                print(pcolors.WARNING + self.channel_title + ', getVideoCount(), Can\'t find the video count with action, So scraper will find it with channel_title' + pcolors.END)
-                search_query = 'https://www.youtube.com/results?search_query=' + self.channel_title
+                print(pcolors.WARNING + self.channel_title + ', getVideoCount(), Can\'t find the video count with channel_title, So scraper will change a query' + pcolors.END)
+                search_query = 'https://www.youtube.com/results?search_query=' + self.channel_title + ' 채널'
                 self.driver.get(search_query)
                 video_cnt_element = self.driver.find_element_by_css_selector('#video-count').text[4:-1]
-        except NoSuchElementException:
-            print(pcolors.WARNING + self.channel_title + ', getVideoCount(), Can\'t find the video count with channel_title, So scraper will change a query' + pcolors.END)
-            search_query = 'https://www.youtube.com/results?search_query=' + self.channel_title + ' 채널'
-            self.driver.get(search_query)
-            video_cnt_element = self.driver.find_element_by_css_selector('#video-count').text[4:-1]
         except Exception as e:
-            print(self.channel_title + ', getVideoCount()')
-            print(e)
+            print(pcolors.EXPT + self.channel_title + ', getVideoCount(), ' + str(e) + pcolors.END)
         finally:
             if video_cnt_element.find(',') != -1:
                 video_cnt_element = video_cnt_element.replace(',', '')
@@ -319,8 +313,7 @@ class Channel:
             self.playlistsTab_parser = BeautifulSoup(self.playlistsTab_src, 'html.parser')
             self.playlists_cnt = len(self.playlistsTab_parser.select('#items > ytd-grid-playlist-renderer'))
         except Exception as e:
-            print(self.channel_title + ', getPlaylistsTabSource()')
-            print(e)
+            print(pcolors.EXPT + self.channel_title + ', getPlaylistsTabSource(), ' + str(e) + pcolors.END)
 
     def getDiscussionTabSource(self):
         try:
@@ -338,9 +331,12 @@ class Channel:
             elif self.driver.find_element_by_css_selector(tab_selector + ' > div').text == '홈' and self.driver.find_element_by_css_selector(tab_selector).get_attribute('aria-selected'):
                 self.discussionTab_enable = False
                 self.discussion_cnt = 0
+        except NoSuchElementException as n:
+            self.discussionTab_enable = False
+            self.discussion_cnt = 0
+            print(pcolors.EXPT + self.channel_title + ', getDiscussionTabSource(), ' + str(n) + pcolors.END)
         except Exception as e:
-            print(self.channel_title + ', getDiscussionTabSource()')
-            print(e)
+            print(pcolors.EXPT + self.channel_title + ', getDiscussionTabSource(), ' + str(e) + pcolors.END)
 
     def getCommunityTabSource(self):
         try:
@@ -357,8 +353,8 @@ class Channel:
                 self.communityTab_enable = False
                 self.post_cnt = 0
         except Exception as e:
-            print(self.channel_title + ', getCommunityTabSource()')
-            print(e)
+            print(pcolors.EXPT + self.channel_title + ', getCommunityTabSource(), ' + str(e) + pcolors.END)
+
 
     # 시간 오래걸리니까 보류
     def moveToVideo(self, url):

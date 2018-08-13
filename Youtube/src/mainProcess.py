@@ -1,6 +1,6 @@
 # created by jeongseok
 # jeongseok912@gmail.com
-# 2018.07.29
+# 2018.08.14
 
 import pymongo
 from multiprocessing import Pool
@@ -101,12 +101,9 @@ def saveData(cursor):
                     }
                 })))
             times.getSpendTime()
-
-            # 리스트 전처리 - 국내 채널 선정(location = 한국 or '')
-            # 리스트 전처리 - 구독자수 내림차순 정렬
         del ch
     except Exception as e:
-        print(e)
+        print(pcolors.EXPT + str(e) + pcolors.END)
     finally:
         cursor.close()
 
@@ -164,7 +161,7 @@ def getData(num):
         saveData(cursor4)
         saveData(cursor5)
     except Exception as e:
-        print(e)
+        print(pcolors.EXPT + str(e) + pcolors.END)
 
 def excuteMultiProcessing():
     # 프로세스 할당
@@ -176,7 +173,7 @@ if __name__ == '__main__':
     times.START
     # TODO: 배열 리턴 -> 제너레이터로 변경
     # 소셜러스 데이터 트리
-    enableGetSocialerusData(False)
+    enableGetSocialerusData(True)
     # 멀티프로세싱으로 youtube에서 데이터 가져오기
     excuteMultiProcessing()
     times.getSpendTime()
