@@ -123,7 +123,9 @@ class Channel:
             # 채널 제목 가져오기
             self.channel_title = self.aboutTab_parser.select_one('#channel-title').text
             # 구독자 수 가져오기
-            subs_cnt_parser = self.aboutTab_parser.select_one('#subscriber-count').text[4:-1].replace(',', '')
+            subs_cnt_parser = self.aboutTab_parser.select_one('#subscriber-count').text[4:-1]
+            if subs_cnt_parser.find(',') != -1:
+                subs_cnt_parser = int(subs_cnt_parser.replace(',', ''))
             if subs_cnt_parser == '':
                 self.subscriber_num = 0
             else:
@@ -184,7 +186,9 @@ class Channel:
             # 정보탭 통계 섹션 정보 가져오기
             self.join_date = self.aboutTab_parser.select_one('#right-column > yt-formatted-string:nth-of-type(2)').text.split(': ')[1]
             if self.aboutTab_parser.select_one('#right-column > yt-formatted-string:nth-of-type(3)').text != '':
-                self.total_view_cnt = int(self.aboutTab_parser.select_one('#right-column > yt-formatted-string:nth-of-type(3)').text.split(' ')[1][:-1].replace(',',''))
+                self.total_view_cnt = self.aboutTab_parser.select_one('#right-column > yt-formatted-string:nth-of-type(3)').text.split(' ')[1][:-1]
+                if self.total_view_cnt.find(',') != -1:
+                    self.total_view_cnt = int(self.total_view_cnt.replace(',', ''))
         except TimeoutException as t:
             print(self.channel_title + ', getAboutTabSource()')
             print(t)
@@ -279,17 +283,27 @@ class Channel:
 
     def getVideoCount(self):
         try:
+            try:
+                search = self.driver.find_element_by_css_selector('#form').get_attribute('action').split('/')[-2]
+                search_query = 'https://www.youtube.com/results?search_query=' + search
+                self.driver.get(search_query)
+                video_cnt_element = self.driver.find_element_by_css_selector('#video-count').text[4:-1]
+            except NoSuchElementException:
+                print(pcolors.WARNING + self.channel_title + ', getVideoCount(), Can\'t find the video count with action, So scraper will find it with channel_title' + pcolors.END)
+                search_query = 'https://www.youtube.com/results?search_query=' + self.channel_title
+                self.driver.get(search_query)
+                video_cnt_element = self.driver.find_element_by_css_selector('#video-count').text[4:-1]
+        except NoSuchElementException:
+            print(pcolors.WARNING + self.channel_title + ', getVideoCount(), Can\'t find the video count with channel_title, So scraper will change a query' + pcolors.END)
             search_query = 'https://www.youtube.com/results?search_query=' + self.channel_title + ' 채널'
             self.driver.get(search_query)
-            video_cnt_element = self.driver.find_element_by_css_selector('#video-count').text[4:-1].replace(',', '')
-        except NoSuchElementException:
-            search_query = 'https://www.youtube.com/results?search_query=' + self.channel_title
-            self.driver.get(search_query)
-            video_cnt_element = self.driver.find_element_by_css_selector('#video-count').text[4:-1].replace(',', '')
+            video_cnt_element = self.driver.find_element_by_css_selector('#video-count').text[4:-1]
         except Exception as e:
             print(self.channel_title + ', getVideoCount()')
             print(e)
         finally:
+            if video_cnt_element.find(',') != -1:
+                video_cnt_element = video_cnt_element.replace(',', '')
             if video_cnt_element != '':
                 self.video_cnt = int(video_cnt_element)
             else:
