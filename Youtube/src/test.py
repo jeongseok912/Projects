@@ -10,15 +10,27 @@ collection = db.get_collection('channel')
 # cursor = collection.find({'CID': 'UCbIjPWkBCUNn-wC_jui2tfA'})  # 02 fa
 # cursor = collection.find({'CID': 'UCKqx9r4mrFglauNBJc1L_eg'})  # [토이푸딩] ToyPudding TV
 # cursor = collection.find({'CID': 'UCEGJpYOKAD4PQuNIoImyReQ'}) # KwonHee
-# cursor = collection.find({'CID': 'UCNth1SaCfdjPg9WFQYtqAfw'}) # 팀 유통기한
-# cursor = collection.find({'CID': 'UCw8ZhLPdQ0u_Y-TLKd61hGA'}) # 1MILLION Dance Studio
-# cursor = collection.find({'CID': 'UCixfddJJ4VkzIa8tMnSWPFQ'}) # Kanna칸나
-cursor = collection.find({'CID': 'UCKG1FQU_Iz5vYvO7_w10_gg'}) #
+# cursor = collection.find({'CID': 'UCNth1SaCfdjPg9WFQYtqAfw'}) # 팀유통기한 커뮤니티(o), post(~), 토론(x)
+# cursor = collection.find({'CID': 'UCzjEp3u8RMkOJwpc3RzxmWg'}) # 양띵TV콩콩 커뮤니티(o), post(0), 토론(x)
+# cursor = collection.find({'CID': 'UCixfddJJ4VkzIa8tMnSWPFQ'}) # Kanna칸나 커뮤니티(x), 토론(o), 댓글(0)
+cursor = collection.find({'CID': 'UCw8ZhLPdQ0u_Y-TLKd61hGA'}) # 1MILLION Dance Studio
+
+# cursor = collection.find({'CID': 'UCPJmHR4CG_lRuVwKCo0kjjg'}) # KPOP COVER STREET KARAOKE 창현거리노래방 쏭카페
+# cursor = collection.find({'CID': ''}) # CJ7
+# cursor = collection.find({'CID': 'UCKG1FQU_Iz5vYvO7_w10_gg'}) # 음악 연속듣기
+# cursor = collection.find({'CID': 'UCvohsyXlehjoLHWuffue5IA'}) # BHC치킨
+# cursor = collection.find({'CID': 'UCmcOMiiFPkBTx3UK2yfUekQ'}) # #nebyvlogs
+# cursor = collection.find({'CID': 'UCwVw_Ha7k-kxf1I1zSshc-w'}) # 서지혜
+
+
+
 
 
 ch = channel.Channel()
+
 for doc in cursor:
     # 데이터 가져오기
+    # ch.setChannelHomeURL('UC2ShoBD_1svSHQhDsJUHnfw')
     ch.setChannelHomeURL(doc['CID'])
     print('channel_id: ' + ch.channel_id)
 

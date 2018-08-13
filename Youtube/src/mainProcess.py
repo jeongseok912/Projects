@@ -140,7 +140,7 @@ if __name__ == '__main__':
     times.START
     # TODO: 배열 리턴 -> 제너레이터로 변경
     # 소셜러스 데이터 트리
-    enableGetSocialerusData(True)
+    enableGetSocialerusData(False)
     # 멀티프로세싱으로 youtube에서 데이터 가져오기
     excuteMultiProcessing()
     times.getSpendTime()

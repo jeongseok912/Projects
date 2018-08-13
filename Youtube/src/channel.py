@@ -279,13 +279,11 @@ class Channel:
 
     def getVideoCount(self):
         try:
+            search_query = 'https://www.youtube.com/results?search_query=' + self.channel_title + ' 채널'
+            self.driver.get(search_query)
+            video_cnt_element = self.driver.find_element_by_css_selector('#video-count').text[4:-1].replace(',', '')
+        except NoSuchElementException:
             search_query = 'https://www.youtube.com/results?search_query=' + self.channel_title
-            if self.channel_title == 'KPOP COVER STREET KARAOKE 창현거리노래방 쏭카페':
-                search_query ='https://www.youtube.com/results?search_query=창현 거리노래방& 쏭카페'
-            elif self.channel_title == '음악 연속듣기':
-                search_query = 'https://www.youtube.com/results?search_query=채널 음악 연속듣기'
-            elif self.channel_title == 'kimbap':
-                search_query = 'https://www.youtube.com/results?search_query=채널 kimbap'
             self.driver.get(search_query)
             video_cnt_element = self.driver.find_element_by_css_selector('#video-count').text[4:-1].replace(',', '')
         except Exception as e:
@@ -316,16 +314,16 @@ class Channel:
             self.driver.get(self.discussionTab)
             wait(self.driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, 'body')))
             # 홈으로 넘어가는 경우 고려
-            if self.driver.find_elements_by_css_selector('#image-container') or self.driver.find_elements_by_css_selector('#label-text') or self.driver.find_element_by_css_selector('#primary'):
-                self.discussionTab_enable = False
-                self.discussion_cnt = 0
-            else:
-                print(111)
+            tab_selector = '#tabsContent > paper-tab.style-scope.ytd-c4-tabbed-header-renderer.iron-selected'
+            if self.driver.find_element_by_css_selector(tab_selector + ' > div').text == '토론' and self.driver.find_element_by_css_selector(tab_selector).get_attribute('aria-selected'):
                 self.scrollDown()
                 self.discussionTab_src = self.driver.page_source
                 self.discussionTab_parser = BeautifulSoup(self.discussionTab_src, 'html.parser')
-                # TODO: 아래 selector 검토 필요
-                self.discussion_cnt = int(self.discussionTab_parser.select_one('#count > yt-formatted-string').text[3:-1])
+                self.discussion_cnt = int(
+                self.discussionTab_parser.select_one('#count > yt-formatted-string').text[3:-1])
+            elif self.driver.find_element_by_css_selector(tab_selector + ' > div').text == '홈' and self.driver.find_element_by_css_selector(tab_selector).get_attribute('aria-selected'):
+                self.discussionTab_enable = False
+                self.discussion_cnt = 0
         except Exception as e:
             print(self.channel_title + ', getDiscussionTabSource()')
             print(e)
@@ -335,15 +333,15 @@ class Channel:
             # 커뮤니티탭 소스 가져오기
             self.driver.get(self.communityTab)
             wait(self.driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, 'body')))
-            if self.driver.find_elements_by_css_selector('#image-container') or self.driver.find_elements_by_css_selector('#label-text') or self.driver.find_element_by_css_selector('#primary'):
-                self.communityTab_enable = False
-                self.post_cnt = 0
-            else:
+            tab_selector = '#tabsContent > paper-tab.style-scope.ytd-c4-tabbed-header-renderer.iron-selected'
+            if self.driver.find_element_by_css_selector(tab_selector + ' > div').text == '커뮤니티' and self.driver.find_element_by_css_selector(tab_selector).get_attribute('aria-selected'):
                 self.scrollDown()
                 self.communityTab_src = self.driver.page_source
                 self.communityTab_parser = BeautifulSoup(self.communityTab_src, 'html.parser')
-                self.scrollDown()
-                self.post_cnt = len(self.communityTab_parser('#contents > ytd-backstage-post-thread-renderer'))
+                self.post_cnt = len(self.communityTab_parser.select('#contents > ytd-backstage-post-thread-renderer'))
+            elif self.driver.find_element_by_css_selector(tab_selector + ' > div').text == '홈' and self.driver.find_element_by_css_selector(tab_selector).get_attribute('aria-selected'):
+                self.communityTab_enable = False
+                self.post_cnt = 0
         except Exception as e:
             print(self.channel_title + ', getCommunityTabSource()')
             print(e)
