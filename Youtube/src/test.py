@@ -1,5 +1,6 @@
 import channel
 import pymongo
+from myutil import myError
 
 # 몽고DB connection
 conn = pymongo.MongoClient('localhost', 27017)
@@ -25,12 +26,10 @@ collection = db.get_collection('channel')
 # cursor = collection.find({'CID': 'UCfTswP_uNy_h86pUjCU410A'}) # HANA 김하나
 # cursor = collection.find({'CID': 'UCmcOMiiFPkBTx3UK2yfUekQ'}) # #nebyvlogs
 # cursor = collection.find({'CID': 'UCfDWSYJhJfvZm-abHS1lH6Q'}) # Jon Park Vlogs
-cursor = collection.find({'CID': 'UClqMRYeJyY4_qhcY15okzmQ?'})
-
-
-
-
-
+# cursor = collection.find({'CID': 'UClqMRYeJyY4_qhcY15okzmQ?'}) # 감자펀치
+# cursor = collection.find({'CID': 'UCR43XXEm8WgV31MIf6CcDVg'})
+cursor = collection.find({'CID': 'UCiiWTch5kweyoXsvTv16bGQ'}) # 삭제된 채널
+cursor = collection.find({'CID': 'UCqWEkbikkSFnrgGVSEHX_Nw'})
 
 
 ch = channel.Channel()
@@ -41,7 +40,11 @@ for doc in cursor:
     ch.setChannelHomeURL(doc['CID'])
     print('channel_id: ' + ch.channel_id)
 
-    ch.getAboutTabSource()  # set channel_title, subscriber_num, location
+    try:
+        ch.getAboutTabSource()
+    except myError as m:
+        print("111")
+        print(m)
     channel_title = ch.channel_title
     subs_num = ch.subscriber_num
     location = ch.location

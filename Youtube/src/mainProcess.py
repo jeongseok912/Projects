@@ -9,11 +9,11 @@ import os
 # 정의 모듈
 import socialerus as sr
 import channel
-from myutil import pcolors, times
+from myutil import pcolors, times, myError
 
 # 몽고DB connection
 conn = pymongo.MongoClient('localhost', 27017)
-db = conn.get_database('youtube')
+db = conn.get_database('youtube2')
 collection = db.get_collection('channel')
 
 def enableGetSocialerusData(triger):
@@ -26,7 +26,7 @@ def enableGetSocialerusData(triger):
 
         # MongoDB에 랭킹 데이터 저장
         for i in range(len(rankingList)):
-            print(pcolors.PID + 'PID ' + str(os.getpid()) + pcolors.CRUD + ' (insert) ' + pcolors.END + str(collection.insert_one(
+            print(pcolors.PID + 'PID ' + str(os.getpid()) + pcolors.INSERT + ' (insert) ' + pcolors.END + str(collection.insert_one(
                 {
                     "CID": rankingList[i][0],
                     "Category": rankingList[i][1]
@@ -43,7 +43,12 @@ def saveData(cursor):
             # 데이터 가져오기
             ch.setChannelHomeURL(doc['CID'])
             # 정보탭 정보 가져오기
-            ch.getAboutTabSource()
+            try:
+                ch.getAboutTabSource()
+            except myError:
+                print(pcolors.PID + 'PID ' + str(os.getpid()) + pcolors.DELETE + ' (delete) ' + pcolors.END + str(
+                doc.get('_id')) + ' - ' + ch.channel_id + ', ' + str(collection.delete_one({'_id': doc['_id']})))
+                continue
             # 홈 정보 가져오기
             ch.getHomeSource()
             # 비디오탭 정보 가져오기
@@ -58,7 +63,7 @@ def saveData(cursor):
             ch.getCommunityTabSource()
 
             # mongodb에 저장
-            print(pcolors.PID + 'PID ' + str(os.getpid()) + pcolors.CRUD + ' (update) ' + pcolors.END + str(
+            print(pcolors.PID + 'PID ' + str(os.getpid()) + pcolors.UPDATE + ' (update) ' + pcolors.END + str(
                 doc.get('_id')) + ' - ' + ch.channel_title + ', ' + ch.channel_id + ', ' + str(
                 collection.update({'_id': doc['_id']}, {'$set':
                     {

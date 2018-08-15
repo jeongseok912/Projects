@@ -8,13 +8,7 @@ import re
 import time
 
 # 정의 모듈
-from myutil import pcolors
-
-class SquenceError(Exception):
-    def __init__(self, msg):
-        self.msg = msg
-    def __str__(self):
-        return self.msg
+from myutil import pcolors, myError
 
 class Channel:
     def __init__(self):
@@ -105,6 +99,8 @@ class Channel:
             last_height = self.driver.execute_script("return document.documentElement.scrollHeight")
 
     def setChannelHomeURL(self, cid):
+        if cid == 'UClqMRYeJyY4_qhcY15okzmQ?':
+            cid = 'UClqMRYeJyY4_qhcY15okzmQ'
         self.home = 'https://www.youtube.com/channel/' + cid
         self.videoTab = self.home + '/videos?flow=grid&view=0'
         self.playlistsTab = self.home + '/playlists'
@@ -116,6 +112,9 @@ class Channel:
     def getAboutTabSource(self):
         try:
             self.driver.get(self.aboutTab)
+            if wait(self.driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, '#container > yt-formatted-string'))):
+                if self.driver.find_element_by_css_selector('#container > yt-formatted-string').text == "스팸, 현혹 행위, 혼동을 야기하는 콘텐츠 또는 기타 서비스 약관 위반 등으로 YouTube의 정책을 여러 번 또는 심각하게 위반하여 계정이 해지되었습니다.":
+                    raise myError("채널이 삭제되었습니다.")
             wait(self.driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, 'body')))
             self.scrollDown()
             self.aboutTab_src = self.driver.page_source
@@ -186,9 +185,14 @@ class Channel:
             # 정보탭 통계 섹션 정보 가져오기
             self.join_date = self.aboutTab_parser.select_one('#right-column > yt-formatted-string:nth-of-type(2)').text.split(': ')[1]
             if self.aboutTab_parser.select_one('#right-column > yt-formatted-string:nth-of-type(3)').text != '':
-                self.total_view_cnt = self.aboutTab_parser.select_one('#right-column > yt-formatted-string:nth-of-type(3)').text.split(' ')[1][:-1]
-                if self.total_view_cnt.find(',') != -1:
-                    self.total_view_cnt = int(self.total_view_cnt.replace(',', ''))
+                total_view_cnt_selector = self.aboutTab_parser.select_one('#right-column > yt-formatted-string:nth-of-type(3)').text.split(' ')[1][:-1]
+                if total_view_cnt_selector.find(',') != -1:
+                    self.total_view_cnt = int(total_view_cnt_selector.replace(',', ''))
+                else:
+                    self.total_view_cnt = int(total_view_cnt_selector)
+        except myError as m:
+            print(pcolors.EXPT + str(m) + pcolors.END)
+            raise
         except Exception as e:
             print(pcolors.EXPT + self.channel_title + ', getAboutTabSource(), ' + str(e) + pcolors.END)
 
