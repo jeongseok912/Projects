@@ -324,21 +324,21 @@ class Channel:
             # 토론탭 소스 가져오기
             self.driver.get(self.discussionTab)
             wait(self.driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, 'body')))
-            # 홈으로 넘어가는 경우 고려
-            tab_selector = '#tabsContent > paper-tab.style-scope.ytd-c4-tabbed-header-renderer.iron-selected'
-            if self.driver.find_element_by_css_selector(tab_selector + ' > div').text == '토론' and self.driver.find_element_by_css_selector(tab_selector).get_attribute('aria-selected'):
-                self.scrollDown()
-                self.discussionTab_src = self.driver.page_source
-                self.discussionTab_parser = BeautifulSoup(self.discussionTab_src, 'html.parser')
-                self.discussion_cnt = int(
-                self.discussionTab_parser.select_one('#count > yt-formatted-string').text[3:-1])
-            elif self.driver.find_element_by_css_selector(tab_selector + ' > div').text == '홈' and self.driver.find_element_by_css_selector(tab_selector).get_attribute('aria-selected'):
+            try:
+                # 홈으로 넘어가는 경우 고려
+                tab_selector = '#tabsContent > paper-tab.style-scope.ytd-c4-tabbed-header-renderer.iron-selected:nth-of-type(5)'
+                if re.compile('토론').search(self.driver.find_element_by_css_selector(tab_selector + ' > div').text) and self.driver.find_element_by_css_selector(tab_selector).get_attribute('aria-selected'):
+                    self.scrollDown()
+                    self.discussionTab_src = self.driver.page_source
+                    self.discussionTab_parser = BeautifulSoup(self.discussionTab_src, 'html.parser')
+                    self.discussionTab_enable = True
+                    self.discussion_cnt = int(self.discussionTab_parser.select_one('#count > yt-formatted-string').text[3:-1])
+                elif self.driver.find_element_by_css_selector(tab_selector + ' > div').text == '홈' and self.driver.find_element_by_css_selector(tab_selector).get_attribute('aria-selected'):
+                    self.discussionTab_enable = False
+                    self.discussion_cnt = 0
+            except NoSuchElementException:
                 self.discussionTab_enable = False
                 self.discussion_cnt = 0
-        except NoSuchElementException as n:
-            self.discussionTab_enable = False
-            self.discussion_cnt = 0
-            print(pcolors.EXPT + self.channel_title + ', getDiscussionTabSource(), ' + str(n) + pcolors.END)
         except Exception as e:
             print(pcolors.EXPT + self.channel_title + ', getDiscussionTabSource(), ' + str(e) + pcolors.END)
 
@@ -347,24 +347,22 @@ class Channel:
             # 커뮤니티탭 소스 가져오기
             self.driver.get(self.communityTab)
             wait(self.driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, 'body')))
-            tab_selector = '#tabsContent > paper-tab.style-scope.ytd-c4-tabbed-header-renderer.iron-selected'
-            if self.driver.find_element_by_css_selector(tab_selector + ' > div').text == '커뮤니티' and self.driver.find_element_by_css_selector(tab_selector).get_attribute('aria-selected'):
-                self.scrollDown()
-                self.communityTab_src = self.driver.page_source
-                self.communityTab_parser = BeautifulSoup(self.communityTab_src, 'html.parser')
-                self.post_cnt = len(self.communityTab_parser.select('#contents > ytd-backstage-post-thread-renderer'))
-            elif self.driver.find_element_by_css_selector(tab_selector + ' > div').text == '홈' and self.driver.find_element_by_css_selector(tab_selector).get_attribute('aria-selected'):
+            try:
+                tab_selector = '#tabsContent > paper-tab.style-scope.ytd-c4-tabbed-header-renderer.iron-selected:nth-of-type(4)'
+                if re.compile('커뮤니티').search(self.driver.find_element_by_css_selector(tab_selector + ' > div').text) and self.driver.find_element_by_css_selector(tab_selector).get_attribute('aria-selected'):
+                    self.scrollDown()
+                    self.communityTab_src = self.driver.page_source
+                    self.communityTab_parser = BeautifulSoup(self.communityTab_src, 'html.parser')
+                    self.communityTab_enable = True
+                    self.post_cnt = len(self.communityTab_parser.select('#contents > ytd-backstage-post-thread-renderer'))
+                elif self.driver.find_element_by_css_selector(tab_selector + ' > div').text == '홈' and self.driver.find_element_by_css_selector(tab_selector).get_attribute('aria-selected'):
+                    self.communityTab_enable = False
+                    self.post_cnt = 0
+            except NoSuchElementException:
                 self.communityTab_enable = False
                 self.post_cnt = 0
         except Exception as e:
             print(pcolors.EXPT + self.channel_title + ', getCommunityTabSource(), ' + str(e) + pcolors.END)
-
-
-    # 시간 오래걸리니까 보류
-    def moveToVideo(self, url):
-        self.driver.get(url)
-        print(wait(self.driver, 3).until(EC.presence_of_element_located((By.CSS_SELECTOR, '#container > h1 > yt-formatted-string'))).text)
-        print(self.driver.find_element_by_css_selector('#count > yt-view-count-renderer > span.view-count.style-scope.yt-view-count-renderer').text)
 
 if __name__ == '__main__':
     print('execute the \"mainProcess.py\"!')

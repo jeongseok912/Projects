@@ -13,7 +13,7 @@ collection = db.get_collection('channel')
 # cursor = collection.find({'CID': 'UCEGJpYOKAD4PQuNIoImyReQ'}) # KwonHee
 # cursor = collection.find({'CID': 'UCNth1SaCfdjPg9WFQYtqAfw'}) # 팀유통기한 커뮤니티(o), post(~), 토론(x)
 # cursor = collection.find({'CID': 'UCzjEp3u8RMkOJwpc3RzxmWg'}) # 양띵TV콩콩 커뮤니티(o), post(0), 토론(x)
-# cursor = collection.find({'CID': 'UCixfddJJ4VkzIa8tMnSWPFQ'}) # Kanna칸나 커뮤니티(x), 토론(o), 댓글(0)
+cursor = collection.find({'CID': 'UCixfddJJ4VkzIa8tMnSWPFQ'}) # Kanna칸나 커뮤니티(x), 토론(o), 댓글(0)
 # cursor = collection.find({'CID': 'UCw8ZhLPdQ0u_Y-TLKd61hGA'}) # 1MILLION Dance Studio
 
 # cursor = collection.find({'CID': 'UCPJmHR4CG_lRuVwKCo0kjjg'}) # KPOP COVER STREET KARAOKE 창현거리노래방 쏭카페
@@ -23,13 +23,12 @@ collection = db.get_collection('channel')
 # cursor = collection.find({'CID': 'UCmcOMiiFPkBTx3UK2yfUekQ'}) # #nebyvlogs
 # cursor = collection.find({'CID': 'UCwVw_Ha7k-kxf1I1zSshc-w'}) # 서지혜
 
-# cursor = collection.find({'CID': 'UCfTswP_uNy_h86pUjCU410A'}) # HANA 김하나
+# cursor = collection.find({'CID': 'UCYx9lhCw0u2-OoqVtEU0IMg'})
 # cursor = collection.find({'CID': 'UCmcOMiiFPkBTx3UK2yfUekQ'}) # #nebyvlogs
 # cursor = collection.find({'CID': 'UCfDWSYJhJfvZm-abHS1lH6Q'}) # Jon Park Vlogs
 # cursor = collection.find({'CID': 'UClqMRYeJyY4_qhcY15okzmQ?'}) # 감자펀치
 # cursor = collection.find({'CID': 'UCR43XXEm8WgV31MIf6CcDVg'})
-cursor = collection.find({'CID': 'UCiiWTch5kweyoXsvTv16bGQ'}) # 삭제된 채널
-cursor = collection.find({'CID': 'UCqWEkbikkSFnrgGVSEHX_Nw'})
+# cursor = collection.find({'CID': 'UCiiWTch5kweyoXsvTv16bGQ'}) # 삭제된 채널
 
 
 ch = channel.Channel()
@@ -90,4 +89,3 @@ for doc in cursor:
     ch.getCommunityTabSource()
     print('community_enable: ' + str(ch.communityTab_enable))
     print('post_cnt: ' + str(ch.post_cnt))
-

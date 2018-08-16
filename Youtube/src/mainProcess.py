@@ -57,6 +57,7 @@ def saveData(cursor):
             ch.getVideoCount()
             # 재생목록탭 정보 가져오기
             ch.getPlaylistsTabSource()
+
             # 토론탭 정보 가져오기
             ch.getDiscussionTabSource()
             # 커뮤니티탭 정보 가져오기
@@ -102,7 +103,7 @@ def saveData(cursor):
                         'DiscussionVitalization': ch.discussionTab_enable,
                         'DiscussionCount': ch.discussion_cnt,
                         'CommunityVitalization': ch.communityTab_enable,
-                        'CommunityTabPostCount': ch.playlists_cnt
+                        'CommunityTabPostCount': ch.post_cnt
                     }
                 })))
             times.getSpendTime()
@@ -176,7 +177,6 @@ def excuteMultiProcessing():
 
 if __name__ == '__main__':
     times.START
-    # TODO: 배열 리턴 -> 제너레이터로 변경
     # 소셜러스 데이터 트리
     enableGetSocialerusData(True)
     # 멀티프로세싱으로 youtube에서 데이터 가져오기
