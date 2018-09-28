@@ -4,8 +4,9 @@
     <content url="file://$MODULE_DIR$">
       <excludeFolder url="file://$MODULE_DIR$/venv" />
     </content>
-    <orderEntry type="jdk" jdkName="Python 3.6 (Youtube)" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 3.6 (Youtube) (2)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="Titanic" />
+    <orderEntry type="module" module-name="Machine_Learning" />
   </component>
 </module>

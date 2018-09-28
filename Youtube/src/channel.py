@@ -113,7 +113,8 @@ class Channel:
         try:
             self.driver.get(self.aboutTab)
             if wait(self.driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, '#container > yt-formatted-string'))):
-                if self.driver.find_element_by_css_selector('#container > yt-formatted-string').text == "스팸, 현혹 행위, 혼동을 야기하는 콘텐츠 또는 기타 서비스 약관 위반 등으로 YouTube의 정책을 여러 번 또는 심각하게 위반하여 계정이 해지되었습니다.":
+                if re.compile('계정이 해지되었습니다.').search(self.driver.find_element_by_css_selector('#container > yt-formatted-string').text):
+                #if self.driver.find_element_by_css_selector('#container > yt-formatted-string').text == "스팸, 현혹 행위, 혼동을 야기하는 콘텐츠 또는 기타 서비스 약관 위반 등으로 YouTube의 정책을 여러 번 또는 심각하게 위반하여 계정이 해지되었습니다.":
                     raise myError("채널이 삭제되었습니다.")
             wait(self.driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, 'body')))
             self.scrollDown()
@@ -218,14 +219,14 @@ class Channel:
         try:
             elements = self.home_parser.select('ytd-vertical-channel-section-renderer')
             for element in elements:
-                if element.select_one('#title').text != '관련 채널':
+                if element.select_one('#title').text != '관련 채널' or element.select_one('#title').text != '인기 채널':
                     yield element.select_one('#title').text
                     reco_Infos = element.select('#channel-info')
                     for reco_Info in reco_Infos:
                         yield reco_Info.select_one('span').text
                         yield 'https://www.youtube.com' + reco_Info['href']
         except Exception as e:
-            print(pcolors.EXPT + self.channel_title + ', getRecommendChannel(), '    + str(e) + pcolors.END)
+            print(pcolors.EXPT + self.channel_title + ', getRecommendChannel(), ' + str(e) + pcolors.END)
 
     # 시간 오래걸리니까 보류
     def getVideoTabSource(self):
@@ -363,6 +364,62 @@ class Channel:
                 self.post_cnt = 0
         except Exception as e:
             print(pcolors.EXPT + self.channel_title + ', getCommunityTabSource(), ' + str(e) + pcolors.END)
+
+    def initChannelVariable(self):
+        self.channel_id = ''
+        self.video_cnt = 0
+
+        # 홈탭 변수
+        self.home = ''
+        self.home_src = ''
+        self.home_parser = ''
+        self.main_video_enable = False
+        self.section_cnt = 0
+        self.reco_section_title = ''
+        # 동영상탭 변수
+        self.videoTab = ''
+        self.videoTab_src = ''
+        self.videoTab_parser = ''
+        # 재생목록탭 변수
+        self.playlistsTab = ''
+        self.playlistsTab_src = ''
+        self.playlistsTab_parser = ''
+        self.playlists_cnt = 0
+        # 토론탭 변수
+        self.discussionTab = ''
+        self.discussionTab_src = ''
+        self.discussionTab_parser = ''
+        self.discussionTab_enable = True
+        self.discussion_cnt = 0
+        # 커뮤니티탭 변수
+        self.communityTab = ''
+        self.communityTab_src = ''
+        self.communityTab_parser = ''
+        self.communityTab_enable = True
+        self.post_cnt = 0
+        # 정보탭 변수
+        self.aboutTab = ''
+        self.aboutTab_src = ''
+        self.aboutTab_parser = ''
+        self.channel_title = ''
+        self.subscriber_num = 0
+        self.desc_size = 0
+        self.desc = ''
+        self.location = ''
+        self.link_cnt = 0
+        self.instagram = False
+        self.facebook = False
+        self.twitter = False
+        self.googleplus = False
+        self.naver_cafe = False
+        self.naver_blog = False
+        self.tistory = False
+        self.afreeca = False
+        self.youtube = False
+        self.tumblur = False
+        self.others = False
+        self.join_date = ''
+        self.total_view_cnt = 0
 
 if __name__ == '__main__':
     print('execute the \"mainProcess.py\"!')

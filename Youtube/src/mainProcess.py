@@ -2,6 +2,7 @@
 # jeongseok912@gmail.com
 # 2018.08.14
 
+
 import pymongo
 from multiprocessing import Pool
 import os
@@ -13,7 +14,7 @@ from myutil import pcolors, times, myError
 
 # 몽고DB connection
 conn = pymongo.MongoClient('localhost', 27017)
-db = conn.get_database('youtube2')
+db = conn.get_database('youtube')
 collection = db.get_collection('channel')
 
 def enableGetSocialerusData(triger):
@@ -107,6 +108,7 @@ def saveData(cursor):
                     }
                 })))
             times.getSpendTime()
+            ch.initChannelVariable()
         del ch
     except Exception as e:
         print(pcolors.EXPT + str(e) + pcolors.END)
@@ -182,10 +184,3 @@ if __name__ == '__main__':
     # 멀티프로세싱으로 youtube에서 데이터 가져오기
     excuteMultiProcessing()
     times.getSpendTime()
-
-
-
-
-
-
-
