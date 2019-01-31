@@ -11,8 +11,8 @@
   * `국내 유튜브 채널 데이터 분석을 통한 신규 채널 운영 전략.pptx` : 데이터 수집, 가공, 분석 등의 과정을 정리하고, 분석에 대한 고찰을 담은 PPT
 
 # 2. Kaggle
-  * `/House Prices; Advanced Regression Techniques/` : House Prices: Advanced Regression Techniques 컴피티션 제출물 소스 경로
-    * `Strong Regression_submission_rev.1.ipynb` : 1차 제출물에 사용한 python 코드
+  * `/House Prices/` : House Prices: Advanced Regression Techniques 컴피티션 관련 소스 및 자료 경로
+    * `Strong Regression_submission_rev1.ipynb` : 1차 제출물에 사용한 python 코드
       * 사이킷런의 기본적인 회귀 모델 `LinearRegression`과 정규화 회귀 모델 `Ridge`, `Lasso`, `ElasticNet`만 사용한 단순한 회귀 진행
         * SVR 모델, Tree 모델, ensemble 모델 등을 이용한 회귀 추가 예정
         * grid search와 같은 탐색 모델을 통해 세부 튜닝 예정
