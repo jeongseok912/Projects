@@ -11,7 +11,14 @@
   * `국내 유튜브 채널 데이터 분석을 통한 신규 채널 운영 전략.pptx` : 데이터 수집, 가공, 분석 등의 과정을 정리하고, 분석에 대한 고찰을 담은 PPT
 
 # 2. Kaggle
-## 2.1. `/House Prices/`
+## 2.1. `/Titanic/`
+Titanic: Machine Learning from Disaster 컴피티션 관련 소스 및 자료 경로  
+* `Prediction.ipynb`
+  * EDA 진행
+  * missing values 처리 변환기와 feature engineering 변환기를 묶은 전처리 pipeline 제작
+  * svc, ensemble model같은 simple modeling과 stacking model을 이용한 예측 진행
+  * hyperparameter 튜닝 진행
+## 2.2. `/House Prices/`
 House Prices: Advanced Regression Techniques 컴피티션 관련 소스 및 자료 경로  
 * `Strong Regression_submission_rev1.ipynb`
   * 사이킷런의 기본적인 회귀 모델 `LinearRegression`과 정규화 회귀 모델 `Ridge`, `Lasso`, `ElasticNet`만 사용한 단순한 회귀 진행
@@ -19,11 +26,3 @@ House Prices: Advanced Regression Techniques 컴피티션 관련 소스 및 자�
     * grid search와 같은 탐색 모델을 통해 세부 튜닝 예정
   * missing values를 처리하는 변환기와 feature engineering하는 변환기 제작
     * 변환기를 통합하고 파이프라인 처리를 할 수 있도록 refactoring 필요
-## 2.2. `/Titanic/`
-Titanic: Machine Learning from Disaster 컴피티션 관련 소스 및 자료 경로  
-* `Prediction.ipynb`
-  * EDA 진행
-  * ensemble model과 2layer stacking model을 이용한 분류 진행
-    * 더 다양한 모델 시도 및 세부 튜닝 예정
-  * missing values 처리 변환기와 feature engineering 변환기 pipeline 제작
-    * 모델링도 포함하는 pipeline 구축 예정
